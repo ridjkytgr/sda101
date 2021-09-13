@@ -38,7 +38,7 @@ class Lab2 {
     static Queue<Group> linkedList = new LinkedList<Group>();
 
     // Untuk nyimpen grup dengan total penguin masing-masing
-    static Map<String, Integer> hashmap = new HashMap<String, Integer>();
+    static Map<String, Long> hashmap = new HashMap<String, Long>();
 
     static long numOfPenguins = 0;
 
@@ -48,7 +48,7 @@ class Lab2 {
 
         // Untuk keeping track grup apa jumlah berapa (initialize value)
         if (!hashmap.containsKey(Gi)) {
-            hashmap.put(Gi, 0);
+            hashmap.put(Gi, (long) 0);
         }
         numOfPenguins += Xi;
         return numOfPenguins;
@@ -58,29 +58,38 @@ class Lab2 {
     static private String handleLayani(long Yi) {
         numOfPenguins -= Yi;
 
-        // Untuk mengeluarkan yang mengantri pertama
-        for (int i = 0; i < Yi; i++) {
-            Group result = linkedList.peek();
-            result.setJumlah(result.getJumlah() - 1);
-
-            // Untuk keeping track group apa jumlah berapa
-            hashmap.put(result.getNama(), hashmap.get(result.getNama()) + 1);
-
-            // Jika objek tersebut sudah habis jumlahnya, maka pindah ke objek di sebelahnya
-            if (result.getJumlah() == 0) {
-                linkedList.remove();
+        while (Yi > 0) {
+            Group temp = linkedList.peek();
+            long tempAmount;
+            if (Yi > temp.getJumlah()) {
+                tempAmount = Yi - temp.getJumlah();
+                hashmap.put(temp.getNama(), hashmap.get(temp.getNama()) + temp.getJumlah());
+                temp.setJumlah(temp.getJumlah() - Yi);
+                Yi = tempAmount;
+            } else {
+                temp.setJumlah(temp.getJumlah() - Yi);
+                hashmap.put(temp.getNama(), hashmap.get(temp.getNama()) + Yi);
+                Yi = 0;
             }
 
-            if (i == Yi - 1) {
-                return result.getNama();
+            if (temp.getJumlah() <= 0) {
+                Group result = linkedList.remove();
+
+                if (Yi == 0) {
+                    return result.getNama();
+                }
             }
+
+            if (Yi == 0) {
+                return temp.getNama();
+            }
+
         }
         return "";
-
     }
 
     // TODO
-    static private int handleTotal(String Gi) {
+    static private long handleTotal(String Gi) {
         return hashmap.get(Gi);
     }
 
