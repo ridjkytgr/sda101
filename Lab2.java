@@ -18,7 +18,6 @@ class Lab2 {
 
     // Untuk nyimpen grup apa yang terakhir dilayani
     static LinkedList<String> linkedList = new LinkedList<String>();
-    static int llCount = 0;
 
     // Untuk nyimpen grup dengan total penguin masing-masing
     static Hashtable<String, Integer> hashtable = new Hashtable<String, Integer>();
@@ -36,7 +35,6 @@ class Lab2 {
         // Ngisi linked list untuk keeping track grup terakhir
         for (int i = 0; i < Xi; i++) {
             linkedList.add(Gi);
-            llCount++;
         }
 
         // Untuk keeping track grup apa jumlah berapa (initialize value)
@@ -58,10 +56,9 @@ class Lab2 {
         // Untuk mengeluarkan yang mengantri pertama
         for (int i = 0; i < Yi; i++) {
             // Untuk keeping track group apa jumlah berapa
-            hashtable.put(linkedList.get(0), hashtable.get(linkedList.get(0)) + 1);
+            hashtable.put(linkedList.getFirst(), hashtable.get(linkedList.getFirst()) + 1);
 
             linkedList.removeFirst();
-            llCount--;
         }
 
         return result;
