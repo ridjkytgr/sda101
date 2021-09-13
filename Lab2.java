@@ -13,19 +13,52 @@ class Lab2 {
     private static InputReader in;
     private static PrintWriter out;
 
+    // Untuk keeping track banyak penguin yang sedang mengantri
+    static Stack<Integer> stack = new Stack();
+
+    // Untuk nyimpen grup apa yang terakhir dilayani
+    static LinkedList<String> linkedList = new LinkedList();
+    static int llCount = 0;
+
     // TODO
     static private int handleDatang(String Gi, int Xi) {
-        return -1;
+        // Ngisi stack untuk keeping track banyak penguin
+        if (stack.isEmpty()) {
+            stack.push(Xi);
+        } else {
+            int before = stack.pop();
+            stack.push(before + Xi);
+        }
+
+        // Ngisi linked list untuk keeping track grup terakhir
+        for (int i = 0; i < Xi; i++) {
+            linkedList.add(Gi);
+            llCount++;
+        }
+
+        return stack.peek();
     }
 
     // TODO
     static private String handleLayani(int Yi) {
-        return "";
+        // Untuk mengurangi total penguin pada stack
+        int before = stack.pop();
+        stack.push(before - Yi);
+
+        String result = linkedList.get(Yi - 1);
+
+        // Untuk mengeluarkan yang mengantri pertama
+        for (int i = 0; i < Yi; i++) {
+            linkedList.removeFirst();
+            llCount--;
+        }
+
+        return result;
     }
 
     // TODO
     static private int handleTotal(String Gi) {
-        return -1;
+        return stack.peek();
     }
 
     public static void main(String args[]) throws IOException {
