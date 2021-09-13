@@ -17,7 +17,7 @@ class Lab2 {
     static Stack<Integer> stack = new Stack<Integer>();
 
     // Untuk nyimpen grup apa yang terakhir dilayani
-    static LinkedList<String> linkedList = new LinkedList<String>();
+    static Queue<String> linkedList = new LinkedList<String>();
 
     // Untuk nyimpen grup dengan total penguin masing-masing
     static Hashtable<String, Integer> hashtable = new Hashtable<String, Integer>();
@@ -51,17 +51,19 @@ class Lab2 {
         int before = stack.pop();
         stack.push(before - Yi);
 
-        String result = linkedList.get(Yi - 1);
-
         // Untuk mengeluarkan yang mengantri pertama
         for (int i = 0; i < Yi; i++) {
+            String result = linkedList.remove();
             // Untuk keeping track group apa jumlah berapa
-            hashtable.put(linkedList.getFirst(), hashtable.get(linkedList.getFirst()) + 1);
+            hashtable.put(result, hashtable.get(result) + 1);
 
-            linkedList.removeFirst();
+            if (i == Yi - 1) {
+                return result;
+            }
         }
 
-        return result;
+        return "";
+
     }
 
     // TODO
