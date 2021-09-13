@@ -14,11 +14,14 @@ class Lab2 {
     private static PrintWriter out;
 
     // Untuk keeping track banyak penguin yang sedang mengantri
-    static Stack<Integer> stack = new Stack();
+    static Stack<Integer> stack = new Stack<Integer>();
 
     // Untuk nyimpen grup apa yang terakhir dilayani
-    static LinkedList<String> linkedList = new LinkedList();
+    static LinkedList<String> linkedList = new LinkedList<String>();
     static int llCount = 0;
+
+    // Untuk nyimpen grup dengan total penguin masing-masing
+    static Hashtable<String, Integer> hashtable = new Hashtable<String, Integer>();
 
     // TODO
     static private int handleDatang(String Gi, int Xi) {
@@ -36,6 +39,11 @@ class Lab2 {
             llCount++;
         }
 
+        // Untuk keeping track grup apa jumlah berapa (initialize value)
+        if (!hashtable.containsKey(Gi)) {
+            hashtable.put(Gi, 0);
+        }
+
         return stack.peek();
     }
 
@@ -49,6 +57,9 @@ class Lab2 {
 
         // Untuk mengeluarkan yang mengantri pertama
         for (int i = 0; i < Yi; i++) {
+            // Untuk keeping track group apa jumlah berapa
+            hashtable.put(linkedList.get(0), hashtable.get(linkedList.get(0)) + 1);
+
             linkedList.removeFirst();
             llCount--;
         }
@@ -58,7 +69,7 @@ class Lab2 {
 
     // TODO
     static private int handleTotal(String Gi) {
-        return stack.peek();
+        return hashtable.get(Gi);
     }
 
     public static void main(String args[]) throws IOException {
