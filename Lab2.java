@@ -90,6 +90,9 @@ class Lab2 {
 
     // TODO
     static private long handleTotal(String Gi) {
+        if (!hashmap.containsKey(Gi)) {
+            return 0;
+        }
         return hashmap.get(Gi);
     }
 
