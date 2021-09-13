@@ -8,51 +8,80 @@ import java.util.*;
 import static java.lang.Math.min;
 import static java.lang.Math.max;
 
+class Group {
+    private String groupName;
+    private long groupAmount;
+
+    public Group(String name, long amount) {
+        groupName = name;
+        groupAmount = amount;
+    }
+
+    public String getNama() {
+        return groupName;
+    }
+
+    public long getJumlah() {
+        return groupAmount;
+    }
+
+    public void setJumlah(long newValue) {
+        groupAmount = newValue;
+    }
+}
+
 class Lab2 {
 
     private static InputReader in;
     private static PrintWriter out;
     // Untuk nyimpen grup apa yang terakhir dilayani
-    static Queue<String> linkedList = new LinkedList<String>();
+    static Queue<Group> linkedList = new LinkedList<Group>();
 
     // Untuk nyimpen grup dengan total penguin masing-masing
-    static Map<String, Integer> hashtable = new HashMap<String, Integer>();
+    static Map<String, Integer> hashmap = new HashMap<String, Integer>();
+
+    static long numOfPenguins = 0;
 
     // TODO
-    static private int handleDatang(String Gi, int Xi) {
-        // Ngisi linked list untuk keeping track grup terakhir
-        for (int i = 0; i < Xi; i++) {
-            linkedList.add(Gi);
-        }
+    static private long handleDatang(String Gi, long Xi) {
+        linkedList.add(new Group(Gi, Xi));
 
         // Untuk keeping track grup apa jumlah berapa (initialize value)
-        if (!hashtable.containsKey(Gi)) {
-            hashtable.put(Gi, 0);
+        if (!hashmap.containsKey(Gi)) {
+            hashmap.put(Gi, 0);
         }
-
-        return linkedList.size();
+        numOfPenguins += Xi;
+        return numOfPenguins;
     }
 
     // TODO
-    static private String handleLayani(int Yi) {
+    static private String handleLayani(long Yi) {
+        numOfPenguins -= Yi;
+
         // Untuk mengeluarkan yang mengantri pertama
         for (int i = 0; i < Yi; i++) {
-            String result = linkedList.remove();
+            Group result = linkedList.peek();
+            result.setJumlah(result.getJumlah() - 1);
+
             // Untuk keeping track group apa jumlah berapa
-            hashtable.put(result, hashtable.get(result) + 1);
+            hashmap.put(result.getNama(), hashmap.get(result.getNama()) + 1);
+
+            // Jika objek tersebut sudah habis jumlahnya, maka pindah ke objek di sebelahnya
+            if (result.getJumlah() == 0) {
+                linkedList.remove();
+            }
 
             if (i == Yi - 1) {
-                return result;
+                return result.getNama();
             }
         }
-
         return "";
 
     }
 
     // TODO
     static private int handleTotal(String Gi) {
-        return hashtable.get(Gi);
+        return hashmap.get(Gi);
     }
 
     public static void main(String args[]) throws IOException {
