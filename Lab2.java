@@ -12,26 +12,14 @@ class Lab2 {
 
     private static InputReader in;
     private static PrintWriter out;
-
-    // Untuk keeping track banyak penguin yang sedang mengantri
-    static Stack<Integer> stack = new Stack<Integer>();
-
     // Untuk nyimpen grup apa yang terakhir dilayani
     static Queue<String> linkedList = new LinkedList<String>();
 
     // Untuk nyimpen grup dengan total penguin masing-masing
-    static Hashtable<String, Integer> hashtable = new Hashtable<String, Integer>();
+    static Map<String, Integer> hashtable = new HashMap<String, Integer>();
 
     // TODO
     static private int handleDatang(String Gi, int Xi) {
-        // Ngisi stack untuk keeping track banyak penguin
-        if (stack.isEmpty()) {
-            stack.push(Xi);
-        } else {
-            int before = stack.pop();
-            stack.push(before + Xi);
-        }
-
         // Ngisi linked list untuk keeping track grup terakhir
         for (int i = 0; i < Xi; i++) {
             linkedList.add(Gi);
@@ -42,15 +30,11 @@ class Lab2 {
             hashtable.put(Gi, 0);
         }
 
-        return stack.peek();
+        return linkedList.size();
     }
 
     // TODO
     static private String handleLayani(int Yi) {
-        // Untuk mengurangi total penguin pada stack
-        int before = stack.pop();
-        stack.push(before - Yi);
-
         // Untuk mengeluarkan yang mengantri pertama
         for (int i = 0; i < Yi; i++) {
             String result = linkedList.remove();
