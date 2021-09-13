@@ -1,3 +1,8 @@
+
+/**
+ * Referensi ide: Immanuel (2006463162)
+ */
+
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
