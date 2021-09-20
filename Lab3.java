@@ -1,3 +1,7 @@
+/*
+Referensi: Bornyto Hamonangan (2006486084)
+*/
+
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
