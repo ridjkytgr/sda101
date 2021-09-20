@@ -13,14 +13,48 @@ class Lab3 {
     private static InputReader in;
     private static PrintWriter out;
 
+    /*
+     * Note: siang = 0, malem = 1, bolos = 2
+     */
+
+    private static long galian; // Maksimal berapa kali menggali
+
     // TODO
-    static private int findMaxBerlian(ArrayList<Integer> S, ArrayList<Integer> M, ArrayList<Integer> B) {
-        return -1;
+    static private long findMaxBerlian(ArrayList<Integer> S, ArrayList<Integer> M, ArrayList<Integer> B) {
+        long[][][] arr = new long[S.size() + 1][S.size() + 1][3];
+
+        long max = 0;
+
+        for (int i = 1; i < S.size() + 1; i++) {
+            for (int j = 1; j < i + 1; j++) {
+                // Isi array untuk siang
+                arr[i][j][0] = j == 1 ? max(arr[i - 1][j - 1][1], arr[i - 1][j - 1][2]) + S.get(i - 1) + B.get(j - 1)
+                        : max(arr[i - 1][j - 1][1], arr[i - 1][j - 1][2]) + S.get(i - 1) + B.get(j - 1) - B.get(j - 2);
+
+                // Isi array untuk malam
+                arr[i][j][1] = j == 1 ? max(arr[i - 1][j - 1][0], arr[i - 1][j - 1][2]) + M.get(i - 1) + B.get(j - 1)
+                        : max(arr[i - 1][j - 1][0], arr[i - 1][j - 1][2]) + M.get(i - 1) + B.get(j - 1) - B.get(j - 2);
+
+                // Isi array untuk bolos
+
+                arr[i][j][2] = i == j ? 0 : max(max(arr[i - 1][j][0], arr[i - 1][j][1]), arr[i - 1][j][2]);
+
+                long currentLargest = max(max(arr[i][j][0], arr[i][j][1]), arr[i][j][2]);
+
+                // Updating max value and ammountOfDiggings
+                if (currentLargest > max) {
+                    max = currentLargest;
+                    galian = j;
+                }
+
+            }
+        }
+        return max;
     }
 
     // TODO
-    static private int findBanyakGalian(ArrayList<Integer> S, ArrayList<Integer> M, ArrayList<Integer> B) {
-        return -1;
+    static private long findBanyakGalian(ArrayList<Integer> S, ArrayList<Integer> M, ArrayList<Integer> B) {
+        return galian;
     }
 
     public static void main(String args[]) throws IOException {
@@ -51,8 +85,8 @@ class Lab3 {
             B.add(tmp);
         }
 
-        int jawabanBerlian = findMaxBerlian(S, M, B);
-        int jawabanGalian = findBanyakGalian(S, M, B);
+        long jawabanBerlian = findMaxBerlian(S, M, B);
+        long jawabanGalian = findBanyakGalian(S, M, B);
 
         out.print(jawabanBerlian + " " + jawabanGalian);
 
