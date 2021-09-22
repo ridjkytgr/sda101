@@ -13,8 +13,18 @@ public class Tp1 {
     private static PrintWriter out;
     private static ArrayList<Agent> arrList = new ArrayList<Agent>();
 
-    public static int panutan(int numOfToppest) {
-        return 69;
+    public static String panutan(int numOfToppest) {
+        int bakso = 0;
+        int siomay = 0;
+
+        for (int i = 0; i < numOfToppest; i++) {
+            if (arrList.get(i).getSpecialization() == 'B') {
+                bakso++;
+            } else {
+                siomay++;
+            }
+        }
+        return bakso + " " + siomay;
     }
 
     public static String kompetitif() {
@@ -33,6 +43,13 @@ public class Tp1 {
         return 69;
     }
 
+    /**
+     * Method to appoint agent, either to place it on rank 1 or the bottom rank
+     * depending on the eventCode.
+     * 
+     * @param agentCode Which agent that will be ascended or descended
+     * @param eventCode Which action that will be taken (0 = ascend, 1 = descend)
+     */
     public static void appoint(String agentCode, int eventCode) {
         for (int i = 0; i < arrList.size(); i++) {
             if (arrList.get(i).getCode().equals(agentCode)) {
@@ -56,6 +73,7 @@ public class Tp1 {
         for (int i = 0; i < arrList.size(); i++) {
             System.out.print(arrList.get(i).getCode() + " ");
         }
+        System.out.println("");
     }
 
     public static void main(String args[]) throws IOException {
@@ -93,6 +111,7 @@ public class Tp1 {
 
                     appoint(agentCode, eventCode);
                 }
+                printArray();
             }
 
             // Prompt for last evaluation
