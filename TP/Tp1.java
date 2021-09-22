@@ -264,9 +264,6 @@ class Agent {
             this.changeStatus();
         }
         this.currentRank = currentRank;
-        System.out.println(getCode());
-        System.out.println(getCurrentRank());
-        System.out.println(getIsNeverIncrease());
     }
 
     public void increaseAscend() {
