@@ -13,6 +13,15 @@ public class Tp1 {
     private static PrintWriter out;
     private static ArrayList<Agent> arrList = new ArrayList<Agent>();
 
+    // The max ammount of appointments from siesta
+    private static int maxValue;
+
+    // The last rank of the agent that has the maxValue
+    private static int maxRank;
+
+    // The agent that will win the KOMPETITIF evaluation
+    private static Agent maxAgent;
+
     public static String panutan(int numOfToppest) {
         int bakso = 0;
         int siomay = 0;
@@ -28,7 +37,7 @@ public class Tp1 {
     }
 
     public static String kompetitif() {
-        return "HASIL KOMPE";
+        return maxAgent.getCode() + " " + maxAgent.countAscDes();
     }
 
     public static String evaluasi() {
@@ -61,11 +70,27 @@ public class Tp1 {
                 if (eventCode == 0) {
                     temp.increaseAscend();
                     arrList.add(0, temp);
+                    break;
                 } else { // Descend
                     temp.increaseDescend();
                     arrList.add(temp);
+                    break;
                 }
             }
+
+        }
+    }
+
+    /**
+     * Method to recap agent who has the max siesta points value
+     * 
+     * @param agent Agent who needs to be checked
+     */
+    public static void recapMax(Agent agent) {
+        if (agent.countAscDes() > maxValue) {
+            maxValue = agent.countAscDes();
+            maxRank = agent.getCurrentRank();
+            maxAgent = agent;
         }
     }
 
@@ -90,6 +115,11 @@ public class Tp1 {
         batch = in.nextInt();
 
         for (int tmp = 0; tmp < batch; tmp++) {
+            // Reset all of the values and array
+            maxValue = 0;
+            maxRank = 0;
+            arrList.clear();
+
             // Prompt for agents data
             agents = in.nextInt();
             for (int agent = 0; agent < agents; agent++) {
@@ -98,6 +128,9 @@ public class Tp1 {
 
                 // Save agent object
                 arrList.add(new Agent(agentCode, agentSpecialization));
+
+                // Set initial rank
+                arrList.get(agent).setCurrentRank(agent + 1);
             }
 
             // Prompt for ammount of days
@@ -109,9 +142,16 @@ public class Tp1 {
                     String agentCode = in.next();
                     int eventCode = in.nextInt();
 
+                    // Siesta points an agent (it can ascending, or descending)
                     appoint(agentCode, eventCode);
                 }
                 printArray();
+
+                // Assign rank to each agent and also recap the maxValue of siesta points
+                for (int agent = 0; agent < arrList.size(); agent++) {
+                    arrList.get(agent).setCurrentRank(agent + 1);
+                    recapMax(arrList.get(agent));
+                }
             }
 
             // Prompt for last evaluation
@@ -204,6 +244,14 @@ class Agent {
 
     public boolean getIsNeverIncrease() {
         return this.isNeverIncrease;
+    }
+
+    public void setCurrentRank(int currentRank) {
+        // Jika rank-nya naik
+        if (this.currentRank > currentRank) {
+            this.changeStatus();
+        }
+        this.currentRank = currentRank;
     }
 
     public void increaseAscend() {
