@@ -12,6 +12,7 @@ public class Tp1 {
     private static InputReader in;
     private static PrintWriter out;
     private static ArrayList<Agent> arrList = new ArrayList<Agent>();
+    private static Queue<String> queue = new LinkedList<String>();
 
     // The max ammount of appointments from siesta
     private static int maxValue;
@@ -41,7 +42,7 @@ public class Tp1 {
     }
 
     public static String evaluasi() {
-        return "HASIL EVAL";
+        return "";
     }
 
     public static String duo() {
@@ -119,6 +120,7 @@ public class Tp1 {
             maxValue = 0;
             maxRank = 0;
             arrList.clear();
+            queue.clear();
 
             // Prompt for agents data
             agents = in.nextInt();
@@ -147,10 +149,18 @@ public class Tp1 {
                 }
                 printArray();
 
+                // Reset queue
+                queue.clear();
                 // Assign rank to each agent and also recap the maxValue of siesta points
                 for (int agent = 0; agent < arrList.size(); agent++) {
                     arrList.get(agent).setCurrentRank(agent + 1);
                     recapMax(arrList.get(agent));
+
+                    // Recap which agent that never get its rank increased and put it inside of
+                    // queue
+                    if (arrList.get(agent).getIsNeverIncrease()) {
+                        queue.add(arrList.get(agent).getCode());
+                    }
                 }
             }
 
@@ -167,7 +177,9 @@ public class Tp1 {
             } else if (evalCommand.equals("KOMPETITIF")) {
                 out.println(kompetitif());
             } else if (evalCommand.equals("EVALUASI")) {
-                out.println(evaluasi());
+                while (!queue.isEmpty()) {
+                    out.print(queue.remove() + " ");
+                }
             } else if (evalCommand.equals("DUO")) {
                 out.println(duo());
             }
@@ -252,6 +264,9 @@ class Agent {
             this.changeStatus();
         }
         this.currentRank = currentRank;
+        System.out.println(getCode());
+        System.out.println(getCurrentRank());
+        System.out.println(getIsNeverIncrease());
     }
 
     public void increaseAscend() {
