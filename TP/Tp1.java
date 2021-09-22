@@ -11,7 +11,7 @@ import static java.lang.Math.max;
 public class Tp1 {
     private static InputReader in;
     private static PrintWriter out;
-    private static Queue<Agent> linkedList = new LinkedList<Agent>();
+    private static ArrayList<Agent> arrList = new ArrayList<Agent>();
 
     public static int panutan(int numOfToppest) {
         return 69;
@@ -33,8 +33,32 @@ public class Tp1 {
         return 69;
     }
 
-    public static void main(String args[]) throws IOException {
+    public static void appoint(String agentCode, int eventCode) {
+        for (int i = 0; i < arrList.size(); i++) {
+            if (arrList.get(i).getCode().equals(agentCode)) {
+                // Remove and ascend/descend depending on the event code
+                Agent temp = arrList.get(i);
+                arrList.remove(i);
 
+                // Ascend
+                if (eventCode == 0) {
+                    temp.increaseAscend();
+                    arrList.add(0, temp);
+                } else { // Descend
+                    temp.increaseDescend();
+                    arrList.add(temp);
+                }
+            }
+        }
+    }
+
+    public static void printArray() {
+        for (int i = 0; i < arrList.size(); i++) {
+            System.out.print(arrList.get(i).getCode() + " ");
+        }
+    }
+
+    public static void main(String args[]) throws IOException {
         InputStream inputStream = System.in;
         in = new InputReader(inputStream);
         OutputStream outputStream = System.out;
@@ -55,7 +79,7 @@ public class Tp1 {
                 char agentSpecialization = in.next().charAt(0);
 
                 // Save agent object
-                linkedList.add(new Agent(agentCode, agentSpecialization));
+                arrList.add(new Agent(agentCode, agentSpecialization));
             }
 
             // Prompt for ammount of days
@@ -67,6 +91,7 @@ public class Tp1 {
                     String agentCode = in.next();
                     int eventCode = in.nextInt();
 
+                    appoint(agentCode, eventCode);
                 }
             }
 
@@ -160,6 +185,14 @@ class Agent {
 
     public boolean getIsNeverIncrease() {
         return this.isNeverIncrease;
+    }
+
+    public void increaseAscend() {
+        this.ascend++;
+    }
+
+    public void increaseDescend() {
+        this.descend++;
     }
 
     /**
