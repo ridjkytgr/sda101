@@ -11,6 +11,27 @@ import static java.lang.Math.max;
 public class Tp1 {
     private static InputReader in;
     private static PrintWriter out;
+    private static Queue<Agent> linkedList = new LinkedList<Agent>();
+
+    public static int panutan(int numOfToppest) {
+        return 69;
+    }
+
+    public static String kompetitif() {
+        return "HASIL KOMPE";
+    }
+
+    public static String evaluasi() {
+        return "HASIL EVAL";
+    }
+
+    public static String duo() {
+        return "HASIL DUO";
+    }
+
+    public static long deploy(int numOfGroups) {
+        return 69;
+    }
 
     public static void main(String args[]) throws IOException {
 
@@ -30,11 +51,11 @@ public class Tp1 {
             // Prompt for agents data
             agents = in.nextInt();
             for (int agent = 0; agent < agents; agent++) {
-                String prompt = in.next();
-                String[] arrOfPrompt = prompt.split(" ");
+                String agentCode = in.next();
+                char agentSpecialization = in.next().charAt(0);
 
-                String agentCode = arrOfPrompt[0];
-                char agentSpecialization = arrOfPrompt[1].charAt(0);
+                // Save agent object
+                linkedList.add(new Agent(agentCode, agentSpecialization));
             }
 
             // Prompt for ammount of days
@@ -43,40 +64,31 @@ public class Tp1 {
                 // Prompt for ammount of siesta appointing someone events
                 events = in.nextInt();
                 for (int event = 0; event < events; event++) {
-                    String prompt = in.next();
-                    String[] arrOfPrompt = prompt.split(" ");
+                    String agentCode = in.next();
+                    int eventCode = in.nextInt();
 
-                    String agentCode = arrOfPrompt[0];
-                    int eventCode = Integer.parseInt(arrOfPrompt[1]);
                 }
             }
 
             // Prompt for last evaluation
-            String prompt = in.next();
-            String[] arrOfPrompt = prompt.split(" ");
-            String evalCommand = arrOfPrompt[0];
+            String evalCommand = in.next();
 
-            // Jika panutan & deploy
-            if (!arrOfPrompt[1].isEmpty()) {
-                int num = Integer.parseInt(arrOfPrompt[1]);
-
+            if (evalCommand.equals("PANUTAN") || evalCommand.equals("DEPLOY")) {
+                int num = in.nextInt();
                 if (evalCommand.equals("PANUTAN")) {
                     out.println(panutan(num));
                 } else {
                     out.println(deploy(num));
                 }
-            } else {
-                if (evalCommand.equals("KOMPETITIF")) {
-                    out.println(kompetitif());
-                } else if (evalCommand.equals("EVALUASI")) {
-                    out.println(evaluasi());
-                } else {
-                    out.println(duo());
-                }
+            } else if (evalCommand.equals("KOMPETITIF")) {
+                out.println(kompetitif());
+            } else if (evalCommand.equals("EVALUASI")) {
+                out.println(evaluasi());
+            } else if (evalCommand.equals("DUO")) {
+                out.println(duo());
             }
+            out.flush();
         }
-
-        out.flush();
     }
 
     // taken from https://codeforces.com/submissions/Petr
