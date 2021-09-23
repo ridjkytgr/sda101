@@ -96,10 +96,16 @@ public class Tp1 {
     }
 
     public static void printArray() {
+        // Utilize InputStream and PrintWriter
+        InputStream inputStream = System.in;
+        in = new InputReader(inputStream);
+        OutputStream outputStream = System.out;
+        out = new PrintWriter(outputStream);
+
         for (int i = 0; i < arrList.size(); i++) {
-            System.out.print(arrList.get(i).getCode() + " ");
+            out.print(arrList.get(i).getCode() + " ");
         }
-        System.out.println("");
+        out.println("");
     }
 
     public static void main(String args[]) throws IOException {
