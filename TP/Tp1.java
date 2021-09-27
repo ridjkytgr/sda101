@@ -96,9 +96,7 @@ public class Tp1 {
     }
 
     public static void printArray() {
-        // Utilize InputStream and PrintWriter
-        InputStream inputStream = System.in;
-        in = new InputReader(inputStream);
+        // Utilize PrintWriter
         OutputStream outputStream = System.out;
         out = new PrintWriter(outputStream);
 
@@ -106,6 +104,9 @@ public class Tp1 {
             out.print(arrList.get(i).getCode() + " ");
         }
         out.println("");
+
+        // Untuk membuang semua yang tersimpan
+        out.flush();
     }
 
     public static void main(String args[]) throws IOException {
@@ -134,11 +135,13 @@ public class Tp1 {
                 String agentCode = in.next();
                 char agentSpecialization = in.next().charAt(0);
 
+                Agent initiatedAgent = new Agent(agentCode, agentSpecialization);
+
+                // Set rank of the newly added agent
+                initiatedAgent.setCurrentRank(agent + 1);
+
                 // Save agent object
                 arrList.add(new Agent(agentCode, agentSpecialization));
-
-                // Set initial rank
-                arrList.get(agent).setCurrentRank(agent + 1);
             }
 
             // Prompt for ammount of days
@@ -150,7 +153,7 @@ public class Tp1 {
                     String agentCode = in.next();
                     int eventCode = in.nextInt();
 
-                    // Siesta points an agent (it can ascending, or descending)
+                    // Siesta points an agent (it can be ascending, or descending)
                     appoint(agentCode, eventCode);
                 }
                 printArray();
