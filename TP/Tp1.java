@@ -11,7 +11,21 @@ import static java.lang.Math.max;
 public class Tp1 {
     private static InputReader in;
     private static PrintWriter out;
-    private static ArrayList<Agent> arrList = new ArrayList<Agent>();
+
+    // Untuk menyimpan seluruh agent dengan key: Nama dalam String, value: Objek
+    // tersebut.
+    private static Map<String, Agent> agentsData = new HashMap<String, Agent>();
+
+    // Digunakan untuk menyimpan key: Rank dari agent dan value: Nama String dari
+    // agent. (Untuk Panutan)
+    private static Map<Integer, String> agentAndRank = new HashMap<Integer, String>();
+
+    // Untuk mengurutkan ranking dari agent secara keseluruhan.
+    private static PriorityQueue<Integer> pqData = new PriorityQueue<Integer>();
+
+    // Untuk melakukan looping agar bisa menghitung panutan.
+    private static Queue<Agent> qPanutan = new LinkedList<Agent>();
+
     private static Queue<String> queue = new LinkedList<String>();
 
     // The max ammount of appointments from siesta
@@ -23,17 +37,30 @@ public class Tp1 {
     // The agent that will win the KOMPETITIF evaluation
     private static Agent maxAgent;
 
+    // Used for keeping track of the best rank (the lower the better)
+    private static int minR;
+
+    // Used for keeping track of the worst rank (the higher the worse)
+    private static int maxR;
+
     public static String panutan(int numOfToppest) {
+        int i = numOfToppest;
+
         int bakso = 0;
         int siomay = 0;
 
-        for (int i = 0; i < numOfToppest; i++) {
-            if (arrList.get(i).getSpecialization() == 'B') {
+        while (i > 0) {
+            Agent polledQ = qPanutan.poll();
+            char polledSpec = polledQ.getSpecialization();
+
+            if (polledSpec == 'B') {
                 bakso++;
             } else {
                 siomay++;
             }
+            i--;
         }
+
         return bakso + " " + siomay;
     }
 
@@ -61,24 +88,19 @@ public class Tp1 {
      * @param eventCode Which action that will be taken (0 = ascend, 1 = descend)
      */
     public static void appoint(String agentCode, int eventCode) {
-        for (int i = 0; i < arrList.size(); i++) {
-            if (arrList.get(i).getCode().equals(agentCode)) {
-                // Remove and ascend/descend depending on the event code
-                Agent temp = arrList.get(i);
-                arrList.remove(i);
-
-                // Ascend
-                if (eventCode == 0) {
-                    temp.increaseAscend();
-                    arrList.add(0, temp);
-                    break;
-                } else { // Descend
-                    temp.increaseDescend();
-                    arrList.add(temp);
-                    break;
-                }
-            }
-
+        Agent chosenAgent = agentsData.get(agentCode);
+        if (eventCode == 0) {
+            chosenAgent.increaseAscend();
+            agentAndRank.remove((chosenAgent.getCurrentRank()));
+            chosenAgent.setCurrentRank(minR);
+            agentAndRank.put(minR, chosenAgent.getCode());
+            minR--;
+        } else {
+            chosenAgent.increaseDescend();
+            agentAndRank.remove((chosenAgent.getCurrentRank()));
+            chosenAgent.setCurrentRank(maxR);
+            agentAndRank.put(maxR, chosenAgent.getCode());
+            maxR++;
         }
     }
 
@@ -100,13 +122,21 @@ public class Tp1 {
         OutputStream outputStream = System.out;
         out = new PrintWriter(outputStream);
 
-        for (int i = 0; i < arrList.size(); i++) {
-            out.print(arrList.get(i).getCode() + " ");
-        }
-        out.println("");
+        // Sorting the agents rank
+        agentsData.forEach((key, value) -> {
+            pqData.add(value.getCurrentRank());
+        });
 
-        // Untuk membuang semua yang tersimpan
-        out.flush();
+        // Printing the agents based on their rank
+        while (!pqData.isEmpty()) {
+            // Mengisi queue qPanutan agar bisa dihitung bakso dan siomaynya.
+            qPanutan.add(agentsData.get(agentAndRank.get(pqData.peek())));
+
+            out.print(agentAndRank.get(pqData.poll()) + " ");
+
+        }
+
+        out.println("");
     }
 
     public static void main(String args[]) throws IOException {
@@ -124,13 +154,20 @@ public class Tp1 {
 
         for (int tmp = 0; tmp < batch; tmp++) {
             // Reset all of the values and array
+            minR = 0;
             maxValue = 0;
             maxRank = 0;
-            arrList.clear();
             queue.clear();
+            agentsData.clear();
+            agentAndRank.clear();
+            pqData.clear();
+            qPanutan.clear();
 
             // Prompt for agents data
             agents = in.nextInt();
+
+            // Untuk penempatan ranking pada hashmap.
+            maxR = agents + 1;
             for (int agent = 0; agent < agents; agent++) {
                 String agentCode = in.next();
                 char agentSpecialization = in.next().charAt(0);
@@ -141,7 +178,8 @@ public class Tp1 {
                 initiatedAgent.setCurrentRank(agent + 1);
 
                 // Save agent object
-                arrList.add(new Agent(agentCode, agentSpecialization));
+                agentsData.put(initiatedAgent.getCode(), initiatedAgent);
+                agentAndRank.put(initiatedAgent.getCurrentRank(), initiatedAgent.getCode());
             }
 
             // Prompt for ammount of days
@@ -158,19 +196,22 @@ public class Tp1 {
                 }
                 printArray();
 
+                // Agar dapat tercetak dengan tepat
+                out.flush();
+
                 // Reset queue
                 queue.clear();
-                // Assign rank to each agent and also recap the maxValue of siesta points
-                for (int agent = 0; agent < arrList.size(); agent++) {
-                    arrList.get(agent).setCurrentRank(agent + 1);
-                    recapMax(arrList.get(agent));
+                // // Assign rank to each agent and also recap the maxValue of siesta points
+                // for (int agent = 0; agent < arrList.size(); agent++) {
+                // arrList.get(agent).setCurrentRank(agent + 1);
+                // recapMax(arrList.get(agent));
 
-                    // Recap which agent that never get its rank increased and put it inside of
-                    // queue
-                    if (arrList.get(agent).getIsNeverIncrease()) {
-                        queue.add(arrList.get(agent).getCode());
-                    }
-                }
+                // // Recap which agent that never get its rank increased and put it inside of
+                // // queue
+                // if (arrList.get(agent).getIsNeverIncrease()) {
+                // queue.add(arrList.get(agent).getCode());
+                // }
+                // }
             }
 
             // Prompt for last evaluation
