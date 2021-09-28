@@ -16,15 +16,11 @@ public class Tp1 {
     // tersebut.
     private static Map<String, Agent> agentsData = new HashMap<String, Agent>();
 
-    // Digunakan untuk menyimpan key: Rank dari agent dan value: Nama String dari
-    // agent. (Untuk Panutan)
-    private static Map<Integer, String> agentAndRank = new HashMap<Integer, String>();
-
     // Untuk mengurutkan ranking dari agent secara keseluruhan.
-    private static PriorityQueue<Integer> pqData = new PriorityQueue<Integer>();
+    private static PriorityQueue<Agent> pqData = new PriorityQueue<Agent>();
 
-    // Untuk melakukan looping agar bisa menghitung panutan.
-    private static Queue<Agent> qPanutan = new LinkedList<Agent>();
+    // Container dari banyak bakso dan siomay.
+    private static Map<Integer, ArrayList<Integer>> bsContainer = new HashMap<Integer, ArrayList<Integer>>();
 
     private static Queue<String> queue = new LinkedList<String>();
 
@@ -44,24 +40,10 @@ public class Tp1 {
     private static int maxR;
 
     public static String panutan(int numOfToppest) {
-        int i = numOfToppest;
+        ArrayList<Integer> baksoAndSiomay = bsContainer.get(numOfToppest);
 
-        int bakso = 0;
-        int siomay = 0;
-
-        while (i > 0) {
-            Agent polledQ = qPanutan.poll();
-            char polledSpec = polledQ.getSpecialization();
-
-            if (polledSpec == 'B') {
-                bakso++;
-            } else {
-                siomay++;
-            }
-            i--;
-        }
-
-        return bakso + " " + siomay;
+        // Indeks 0 adalah bakso, indeks 1 adalah siomay.
+        return baksoAndSiomay.get(0) + " " + baksoAndSiomay.get(1);
     }
 
     public static String kompetitif() {
@@ -91,15 +73,11 @@ public class Tp1 {
         Agent chosenAgent = agentsData.get(agentCode);
         if (eventCode == 0) {
             chosenAgent.increaseAscend();
-            agentAndRank.remove((chosenAgent.getCurrentRank()));
             chosenAgent.setCurrentRank(minR);
-            agentAndRank.put(minR, chosenAgent.getCode());
             minR--;
         } else {
             chosenAgent.increaseDescend();
-            agentAndRank.remove((chosenAgent.getCurrentRank()));
             chosenAgent.setCurrentRank(maxR);
-            agentAndRank.put(maxR, chosenAgent.getCode());
             maxR++;
         }
     }
@@ -117,22 +95,35 @@ public class Tp1 {
         }
     }
 
-    public static void printArray() {
+    public static void printArrayAndCountPanutan(int day, int days) {
         // Utilize PrintWriter
         OutputStream outputStream = System.out;
         out = new PrintWriter(outputStream);
 
         // Sorting the agents rank
         agentsData.forEach((key, value) -> {
-            pqData.add(value.getCurrentRank());
+            pqData.add(value);
         });
 
+        // Counter untuk mengisi HashMap bsContainer
+        int rank = 1;
+        int bakso = 0;
+        int siomay = 0;
         // Printing the agents based on their rank
         while (!pqData.isEmpty()) {
-            // Mengisi queue qPanutan agar bisa dihitung bakso dan siomaynya.
-            qPanutan.add(agentsData.get(agentAndRank.get(pqData.peek())));
-
-            out.print(agentAndRank.get(pqData.poll()) + " ");
+            // Mengisi HashMap jika sudah hari terakhir
+            if (day == days - 1) {
+                if (pqData.peek().getSpecialization() == 'B') {
+                    bakso++;
+                } else {
+                    siomay++;
+                }
+                // Mengisi container bakso dan siomay
+                bsContainer.put(rank++, new ArrayList<Integer>(Arrays.asList(bakso, siomay)));
+            }
+            ;
+            // Print urutan rank.
+            out.print(pqData.poll().getCode() + " ");
 
         }
 
@@ -154,19 +145,18 @@ public class Tp1 {
 
         for (int tmp = 0; tmp < batch; tmp++) {
             // Reset all of the values and array
-            minR = 0;
             maxValue = 0;
             maxRank = 0;
             queue.clear();
-            agentsData.clear();
-            agentAndRank.clear();
-            pqData.clear();
-            qPanutan.clear();
+
+            // Make new HashMap instead of clear cause clear has O(N) complexity.
+            agentsData = new HashMap<String, Agent>();
 
             // Prompt for agents data
             agents = in.nextInt();
 
             // Untuk penempatan ranking pada hashmap.
+            minR = 0;
             maxR = agents + 1;
             for (int agent = 0; agent < agents; agent++) {
                 String agentCode = in.next();
@@ -179,7 +169,6 @@ public class Tp1 {
 
                 // Save agent object
                 agentsData.put(initiatedAgent.getCode(), initiatedAgent);
-                agentAndRank.put(initiatedAgent.getCurrentRank(), initiatedAgent.getCode());
             }
 
             // Prompt for ammount of days
@@ -194,7 +183,7 @@ public class Tp1 {
                     // Siesta points an agent (it can be ascending, or descending)
                     appoint(agentCode, eventCode);
                 }
-                printArray();
+                printArrayAndCountPanutan(day, days);
 
                 // Agar dapat tercetak dengan tepat
                 out.flush();
@@ -269,7 +258,7 @@ public class Tp1 {
     }
 }
 
-class Agent {
+class Agent implements Comparable<Agent> {
     private char specialization;
     private String code;
     private int ascend;
@@ -339,5 +328,16 @@ class Agent {
      */
     public void changeStatus() {
         this.isNeverIncrease = false;
+    }
+
+    /**
+     * Untuk sort saat berada di dalam priority queue.
+     * 
+     * @param anotherAgent Agent yang akan dibandingkan saat melakukan sorting.
+     * @return Positif, nol, atau negatif.
+     */
+    @Override
+    public int compareTo(Agent anotherAgent) {
+        return this.getCurrentRank() - anotherAgent.getCurrentRank();
     }
 }
