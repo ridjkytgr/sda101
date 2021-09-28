@@ -19,6 +19,9 @@ public class Tp1 {
     // Untuk mengurutkan ranking dari agent secara keseluruhan.
     private static PriorityQueue<Agent> pqData = new PriorityQueue<Agent>();
 
+    // Untuk mencetak evaluasi agar terurut.
+    private static PriorityQueue<String> pqEval = new PriorityQueue<String>();
+
     // Untuk menyimpan ke dalam kompeHashMap.
     private static Stack<Agent> kompeStack = new Stack<Agent>();
 
@@ -43,8 +46,6 @@ public class Tp1 {
     // Used for keeping track of the worst rank (the higher the worse)
     private static int maxR;
 
-    private static String evaluasi;
-
     public static String panutan(int numOfToppest) {
         ArrayList<Integer> baksoAndSiomay = bsContainer.get(numOfToppest);
 
@@ -56,8 +57,25 @@ public class Tp1 {
         return kompeHashMap.get(maxValue) + " " + maxValue;
     }
 
-    public static String evaluasi() {
-        return "";
+    public static void evaluasi() {
+        // Utilize PrintWriter
+        OutputStream outputStream = System.out;
+        out = new PrintWriter(outputStream);
+
+        // Memasukkan nama-nama yang tidak pernah naik ranking ke dalam pqEval.
+        agentsData.forEach((key, value) -> {
+            if (value.getIsNeverIncrease()) {
+                pqEval.add(value.getCode());
+            }
+        });
+
+        // Mencetak isi pqEval.
+        while (!pqEval.isEmpty()) {
+            out.print(pqEval.poll() + " ");
+        }
+
+        out.println("");
+        out.flush();
     }
 
     public static String duo() {
@@ -103,16 +121,6 @@ public class Tp1 {
         }
     }
 
-    public static void evalPrep() {
-        agentsData.forEach((key, value) -> {
-            System.out.println(key + " " + value.getCurrentRank());
-            if (value.getIsNeverIncrease()) {
-                // evaluasi = String.join(" ", key);
-            }
-        });
-        // System.out.println(evaluasi);
-    }
-
     public static void printArrayEtc(int day, int days) {
         // Utilize PrintWriter
         OutputStream outputStream = System.out;
@@ -121,8 +129,6 @@ public class Tp1 {
         agentsData.forEach((key, value) -> {
             // Sorting the agents rnk
             pqData.add(value);
-
-            //
         });
 
         // Counter untuk mengisi HashMap bsContainer
@@ -130,7 +136,7 @@ public class Tp1 {
         int rankCounter = 1;
         int bakso = 0;
         int siomay = 0;
-        // Printing the agents based on their rank
+
         while (!pqData.isEmpty()) {
             // Mengisi HashMap jika sudah hari terakhir (Untuk panutan)
             if (day == days - 1) {
@@ -147,8 +153,11 @@ public class Tp1 {
             // otomatis mengambil yang rank tertinggi.
             kompeStack.push(pqData.peek());
 
-            // Normalisasi rank dari masing-masing agent.
+            // Normalisasi tanpa mengecek rank sebelumnya.
             pqData.peek().setCurrentRank(rankCounter++);
+
+            // Normalisasi rank dari masing-masing agent.
+            pqData.peek().setLastRankAndStatus();
 
             // Normalisasi batas bawah dan batas atas
             minR = 0;
@@ -198,6 +207,7 @@ public class Tp1 {
 
                 // Set rank of the newly added agent
                 initiatedAgent.setCurrentRank(agent + 1);
+                initiatedAgent.setLastRankAndStatus();
 
                 // Save agent object
                 agentsData.put(initiatedAgent.getCode(), initiatedAgent);
@@ -223,9 +233,7 @@ public class Tp1 {
                 // Agar dapat tercetak dengan tepat
                 out.flush();
 
-                evalPrep();
             }
-
             // Prompt for last evaluation
             String evalCommand = in.next();
 
@@ -239,7 +247,7 @@ public class Tp1 {
             } else if (evalCommand.equals("KOMPETITIF")) {
                 out.println(kompetitif());
             } else if (evalCommand.equals("EVALUASI")) {
-                out.println(evaluasi());
+                evaluasi();
             } else if (evalCommand.equals("DUO")) {
                 out.println(duo());
             }
@@ -285,6 +293,7 @@ class Agent implements Comparable<Agent> {
     private int ascend;
     private int descend;
     private int currentRank;
+    private int lastRank;
     private boolean isNeverIncrease = true;
 
     public Agent(String code, char specialization) {
@@ -319,11 +328,14 @@ class Agent implements Comparable<Agent> {
     }
 
     public void setCurrentRank(int currentRank) {
-        // Jika rank-nya naik
-        if (this.currentRank > currentRank) {
+        this.currentRank = currentRank;
+    }
+
+    public void setLastRankAndStatus() {
+        if (this.lastRank > this.currentRank) {
             this.changeStatus();
         }
-        this.currentRank = currentRank;
+        this.lastRank = this.currentRank;
     }
 
     public void increaseAscend() {
