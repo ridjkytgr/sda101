@@ -19,10 +19,14 @@ public class Tp1 {
     // Untuk mengurutkan ranking dari agent secara keseluruhan.
     private static PriorityQueue<Agent> pqData = new PriorityQueue<Agent>();
 
+    // Untuk menyimpan ke dalam kompeHashMap.
+    private static Stack<Agent> kompeStack = new Stack<Agent>();
+
+    // Untuk menyimpan berapa banyak ditunjuk dan nama yang ditunjuk.
+    private static Map<Integer, String> kompeHashMap = new HashMap<Integer, String>();
+
     // Container dari banyak bakso dan siomay.
     private static Map<Integer, ArrayList<Integer>> bsContainer = new HashMap<Integer, ArrayList<Integer>>();
-
-    private static Queue<String> queue = new LinkedList<String>();
 
     // The max ammount of appointments from siesta
     private static int maxValue;
@@ -39,6 +43,8 @@ public class Tp1 {
     // Used for keeping track of the worst rank (the higher the worse)
     private static int maxR;
 
+    private static String evaluasi;
+
     public static String panutan(int numOfToppest) {
         ArrayList<Integer> baksoAndSiomay = bsContainer.get(numOfToppest);
 
@@ -47,7 +53,7 @@ public class Tp1 {
     }
 
     public static String kompetitif() {
-        return maxAgent.getCode() + " " + maxAgent.countAscDes();
+        return kompeHashMap.get(maxValue) + " " + maxValue;
     }
 
     public static String evaluasi() {
@@ -83,35 +89,50 @@ public class Tp1 {
     }
 
     /**
-     * Method to recap agent who has the max siesta points value
-     * 
-     * @param agent Agent who needs to be checked
+     * Menyiapkan segala kebutuhan yang diperlukan untuk memenuhi evaluasi kompe.
      */
-    public static void recapMax(Agent agent) {
-        if (agent.countAscDes() > maxValue) {
-            maxValue = agent.countAscDes();
-            maxRank = agent.getCurrentRank();
-            maxAgent = agent;
+    public static void kompePrep() {
+        // Mencari nilai penunjukkan siesta yang terbanyak.
+        while (!kompeStack.isEmpty()) {
+            int currentValue = kompeStack.peek().countAscDes();
+            if (Math.max(maxValue, currentValue) == currentValue) {
+                maxValue = currentValue;
+            }
+            // Menyimpan ke dalam HashMap agar dapat dipanggil di Kompe.
+            kompeHashMap.put(currentValue, kompeStack.pop().getCode());
         }
     }
 
-    public static void printArrayAndCountPanutan(int day, int days) {
+    public static void evalPrep() {
+        agentsData.forEach((key, value) -> {
+            System.out.println(key + " " + value.getCurrentRank());
+            if (value.getIsNeverIncrease()) {
+                // evaluasi = String.join(" ", key);
+            }
+        });
+        // System.out.println(evaluasi);
+    }
+
+    public static void printArrayEtc(int day, int days) {
         // Utilize PrintWriter
         OutputStream outputStream = System.out;
         out = new PrintWriter(outputStream);
 
-        // Sorting the agents rank
         agentsData.forEach((key, value) -> {
+            // Sorting the agents rnk
             pqData.add(value);
+
+            //
         });
 
         // Counter untuk mengisi HashMap bsContainer
-        int rank = 1;
+        int firstNRank = 1;
+        int rankCounter = 1;
         int bakso = 0;
         int siomay = 0;
         // Printing the agents based on their rank
         while (!pqData.isEmpty()) {
-            // Mengisi HashMap jika sudah hari terakhir
+            // Mengisi HashMap jika sudah hari terakhir (Untuk panutan)
             if (day == days - 1) {
                 if (pqData.peek().getSpecialization() == 'B') {
                     bakso++;
@@ -119,9 +140,20 @@ public class Tp1 {
                     siomay++;
                 }
                 // Mengisi container bakso dan siomay
-                bsContainer.put(rank++, new ArrayList<Integer>(Arrays.asList(bakso, siomay)));
+                bsContainer.put(firstNRank++, new ArrayList<Integer>(Arrays.asList(bakso, siomay)));
             }
-            ;
+
+            // Mengisi stack sesuai dengan urutan rank agar jika ada yang duplikat maka
+            // otomatis mengambil yang rank tertinggi.
+            kompeStack.push(pqData.peek());
+
+            // Normalisasi rank dari masing-masing agent.
+            pqData.peek().setCurrentRank(rankCounter++);
+
+            // Normalisasi batas bawah dan batas atas
+            minR = 0;
+            maxR = agentsData.size() + 1;
+
             // Print urutan rank.
             out.print(pqData.poll().getCode() + " ");
 
@@ -147,10 +179,10 @@ public class Tp1 {
             // Reset all of the values and array
             maxValue = 0;
             maxRank = 0;
-            queue.clear();
 
             // Make new HashMap instead of clear cause clear has O(N) complexity.
             agentsData = new HashMap<String, Agent>();
+            kompeHashMap = new HashMap<Integer, String>();
 
             // Prompt for agents data
             agents = in.nextInt();
@@ -183,24 +215,15 @@ public class Tp1 {
                     // Siesta points an agent (it can be ascending, or descending)
                     appoint(agentCode, eventCode);
                 }
-                printArrayAndCountPanutan(day, days);
+
+                // Melakukan berbagai perhitungan.
+                printArrayEtc(day, days);
+                kompePrep();
 
                 // Agar dapat tercetak dengan tepat
                 out.flush();
 
-                // Reset queue
-                queue.clear();
-                // // Assign rank to each agent and also recap the maxValue of siesta points
-                // for (int agent = 0; agent < arrList.size(); agent++) {
-                // arrList.get(agent).setCurrentRank(agent + 1);
-                // recapMax(arrList.get(agent));
-
-                // // Recap which agent that never get its rank increased and put it inside of
-                // // queue
-                // if (arrList.get(agent).getIsNeverIncrease()) {
-                // queue.add(arrList.get(agent).getCode());
-                // }
-                // }
+                evalPrep();
             }
 
             // Prompt for last evaluation
@@ -216,9 +239,7 @@ public class Tp1 {
             } else if (evalCommand.equals("KOMPETITIF")) {
                 out.println(kompetitif());
             } else if (evalCommand.equals("EVALUASI")) {
-                while (!queue.isEmpty()) {
-                    out.print(queue.remove() + " ");
-                }
+                out.println(evaluasi());
             } else if (evalCommand.equals("DUO")) {
                 out.println(duo());
             }
