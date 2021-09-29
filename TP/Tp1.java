@@ -19,26 +19,26 @@ public class Tp1 {
     // Untuk mengurutkan ranking dari agent secara keseluruhan.
     private static PriorityQueue<Agent> pqData = new PriorityQueue<Agent>();
 
-    // Untuk mencetak evaluasi agar terurut.
-    private static PriorityQueue<String> pqEval = new PriorityQueue<String>();
+    // Container dari banyak bakso dan siomay.
+    private static Map<Integer, ArrayList<Integer>> bsContainer = new HashMap<Integer, ArrayList<Integer>>();
 
     // Untuk menyimpan ke dalam kompeHashMap.
     private static Stack<Agent> kompeStack = new Stack<Agent>();
 
-    // Untuk menyimpan berapa banyak ditunjuk dan nama yang ditunjuk.
+    // Untuk meniympan agen siapa yang ditunjuk terbanyak oleh siesta.
     private static Map<Integer, String> kompeHashMap = new HashMap<Integer, String>();
 
-    // Container dari banyak bakso dan siomay.
-    private static Map<Integer, ArrayList<Integer>> bsContainer = new HashMap<Integer, ArrayList<Integer>>();
+    // Untuk mencetak evaluasi agar terurut.
+    private static Queue<String> qEval = new LinkedList<String>();
+
+    // Untuk menyimpan agent yang merupakan kang bakso.
+    private static Queue<String> qBakso = new LinkedList<String>();
+
+    // Untuk menyimpan agent yang merupakan kang siomay.
+    private static Queue<String> qSiomay = new LinkedList<String>();
 
     // The max ammount of appointments from siesta
     private static int maxValue;
-
-    // The last rank of the agent that has the maxValue
-    private static int maxRank;
-
-    // The agent that will win the KOMPETITIF evaluation
-    private static Agent maxAgent;
 
     // Used for keeping track of the best rank (the lower the better)
     private static int minR;
@@ -46,6 +46,13 @@ public class Tp1 {
     // Used for keeping track of the worst rank (the higher the worse)
     private static int maxR;
 
+    /**
+     * Method untuk mencari berapa banyak kang bakso dan kang siomay untuk n-rank
+     * pertama.
+     * 
+     * @param numOfToppest integer yang merupakan n-rank pertama.
+     * @return integer banyak kang bakso dan kang siomay dalam 1 line.
+     */
     public static String panutan(int numOfToppest) {
         ArrayList<Integer> baksoAndSiomay = bsContainer.get(numOfToppest);
 
@@ -62,24 +69,54 @@ public class Tp1 {
         OutputStream outputStream = System.out;
         out = new PrintWriter(outputStream);
 
-        // Memasukkan nama-nama yang tidak pernah naik ranking ke dalam pqEval.
-        agentsData.forEach((key, value) -> {
-            if (value.getIsNeverIncrease()) {
-                pqEval.add(value.getCode());
+        // Mencetak isi qEval.
+        if (qEval.isEmpty()) {
+            out.println("TIDAK ADA");
+        } else {
+            while (!qEval.isEmpty()) {
+                out.print(qEval.poll() + " ");
             }
-        });
-
-        // Mencetak isi pqEval.
-        while (!pqEval.isEmpty()) {
-            out.print(pqEval.poll() + " ");
+            out.println("");
         }
-
-        out.println("");
-        out.flush();
     }
 
-    public static String duo() {
-        return "HASIL DUO";
+    public static void duo() {
+        // Utilize PrintWriter
+        OutputStream outputStream = System.out;
+        out = new PrintWriter(outputStream);
+
+        if (qBakso.size() < qSiomay.size()) {
+            while (!qBakso.isEmpty()) {
+                out.print(qBakso.poll() + " " + qSiomay.poll());
+                out.println("");
+            }
+
+            out.print("TIDAK DAPAT: ");
+
+            while (!qSiomay.isEmpty()) {
+                out.print(qSiomay.poll() + " ");
+            }
+
+            out.println();
+        } else if (qSiomay.size() < qBakso.size()) {
+            while (!qSiomay.isEmpty()) {
+                out.print(qBakso.poll() + " " + qSiomay.poll());
+                out.println("");
+            }
+
+            out.print("TIDAK DAPAT: ");
+
+            while (!qBakso.isEmpty()) {
+                out.print(qBakso.poll() + " ");
+            }
+
+            out.println();
+        } else {
+            while (!qSiomay.isEmpty()) {
+                out.print(qBakso.poll() + " " + qSiomay.poll());
+                out.println("");
+            }
+        }
     }
 
     public static long deploy(int numOfGroups) {
@@ -138,17 +175,6 @@ public class Tp1 {
         int siomay = 0;
 
         while (!pqData.isEmpty()) {
-            // Mengisi HashMap jika sudah hari terakhir (Untuk panutan)
-            if (day == days - 1) {
-                if (pqData.peek().getSpecialization() == 'B') {
-                    bakso++;
-                } else {
-                    siomay++;
-                }
-                // Mengisi container bakso dan siomay
-                bsContainer.put(firstNRank++, new ArrayList<Integer>(Arrays.asList(bakso, siomay)));
-            }
-
             // Mengisi stack sesuai dengan urutan rank agar jika ada yang duplikat maka
             // otomatis mengambil yang rank tertinggi.
             kompeStack.push(pqData.peek());
@@ -158,6 +184,29 @@ public class Tp1 {
 
             // Normalisasi rank dari masing-masing agent.
             pqData.peek().setLastRankAndStatus();
+
+            // Mengisi HashMap jika sudah hari terakhir (Untuk panutan)
+            if (day == days - 1) {
+                if (pqData.peek().getSpecialization() == 'B') {
+                    bakso++;
+                } else {
+                    siomay++;
+                }
+                // Mengisi container bakso dan siomay
+                bsContainer.put(firstNRank++, new ArrayList<Integer>(Arrays.asList(bakso, siomay)));
+
+                // Menambahkan siapa saja yang tidak pernah naik rank.
+                if (pqData.peek().getIsNeverIncrease()) {
+                    qEval.add(pqData.peek().getCode());
+                }
+
+                // Untuk memisahkan siomay dan bakso ke container-nya masing-masing.
+                if (pqData.peek().getSpecialization() == 'B') {
+                    qBakso.add(pqData.peek().getCode());
+                } else {
+                    qSiomay.add(pqData.peek().getCode());
+                }
+            }
 
             // Normalisasi batas bawah dan batas atas
             minR = 0;
@@ -185,9 +234,7 @@ public class Tp1 {
         batch = in.nextInt();
 
         for (int tmp = 0; tmp < batch; tmp++) {
-            // Reset all of the values and array
             maxValue = 0;
-            maxRank = 0;
 
             // Make new HashMap instead of clear cause clear has O(N) complexity.
             agentsData = new HashMap<String, Agent>();
@@ -199,6 +246,7 @@ public class Tp1 {
             // Untuk penempatan ranking pada hashmap.
             minR = 0;
             maxR = agents + 1;
+
             for (int agent = 0; agent < agents; agent++) {
                 String agentCode = in.next();
                 char agentSpecialization = in.next().charAt(0);
@@ -232,7 +280,6 @@ public class Tp1 {
 
                 // Agar dapat tercetak dengan tepat
                 out.flush();
-
             }
             // Prompt for last evaluation
             String evalCommand = in.next();
@@ -249,9 +296,12 @@ public class Tp1 {
             } else if (evalCommand.equals("EVALUASI")) {
                 evaluasi();
             } else if (evalCommand.equals("DUO")) {
-                out.println(duo());
+                duo();
             }
             out.flush();
+
+            // Me-reset queue.
+            qEval.clear();
         }
     }
 
@@ -301,6 +351,7 @@ class Agent implements Comparable<Agent> {
         this.specialization = specialization;
         this.ascend = 0;
         this.descend = 0;
+        this.lastRank = 0;
     }
 
     public String getCode() {
