@@ -37,6 +37,9 @@ public class Tp1 {
     // Untuk menyimpan agent yang merupakan kang siomay.
     private static Queue<String> qSiomay = new LinkedList<String>();
 
+    // Menyimpan urutan-urutan agent yang akan di-deploy (bakso = 0, siomay = 1)
+    private static int[] arrDeploy = new int[agentsData.size()];
+
     // The max ammount of appointments from siesta
     private static int maxValue;
 
@@ -45,6 +48,9 @@ public class Tp1 {
 
     // Used for keeping track of the worst rank (the higher the worse)
     private static int maxR;
+
+    // Used to count how many ways to deploy.
+    private static long deployWays;
 
     /**
      * Method untuk mencari berapa banyak kang bakso dan kang siomay untuk n-rank
@@ -119,8 +125,41 @@ public class Tp1 {
         }
     }
 
-    public static long deploy(int numOfGroups) {
-        return 69;
+    public static void deployHelper(int numOfGroups) {
+        deployWays = 0;
+        deployWays = deploy(1, numOfGroups, arrDeploy[0]);
+        System.out.println(deployWays);
+    }
+
+    public static long deploy(int index, int numOfGroups, int target) {
+        // Base cases
+        if (index > arrDeploy.length - 1) { // If index out of bound (ex: [111]1 -> index +
+            // 2 error)
+            return 0;
+        }
+
+        if (numOfGroups == 0 && index < arrDeploy.length - 1) { // Jika grup yang terbentuk lebih dari yang
+                                                                // diinginkan.
+            return 0;
+        }
+
+        if (numOfGroups == 1 && index == arrDeploy.length - 1) {
+            if (target == arrDeploy[index]) { // Memenuhi syarat
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+
+        // Recursive cases
+        if (target == arrDeploy[index] && index < arrDeploy.length - 1) {
+            // Memperlebar grup dan menghentikan grup saat ini (buat baru lagi)
+            return deploy(index + 1, numOfGroups, target) + deploy(index + 2, numOfGroups - 1, arrDeploy[index + 1]);
+        } else if (target != arrDeploy[index] && index < arrDeploy.length - 1) {
+            // Recursive case: Memperlebar grup (memindahkan pointer)
+            return deploy(index + 1, numOfGroups, target);
+        }
+        return 0;
     }
 
     /**
@@ -173,6 +212,8 @@ public class Tp1 {
         int rankCounter = 1;
         int bakso = 0;
         int siomay = 0;
+        int indexDeploy = 0;
+        arrDeploy = new int[agentsData.size()];
 
         while (!pqData.isEmpty()) {
             // Mengisi stack sesuai dengan urutan rank agar jika ada yang duplikat maka
@@ -186,6 +227,7 @@ public class Tp1 {
             pqData.peek().setLastRankAndStatus();
 
             // Mengisi HashMap jika sudah hari terakhir (Untuk panutan)
+
             if (day == days - 1) {
                 if (pqData.peek().getSpecialization() == 'B') {
                     bakso++;
@@ -205,6 +247,14 @@ public class Tp1 {
                     qBakso.add(pqData.peek().getCode());
                 } else {
                     qSiomay.add(pqData.peek().getCode());
+                }
+
+                // Mengisi array yang akan digunakan untuk deploy (0 untuk bakso, 1 untuk
+                // siomay)
+                if (pqData.peek().getSpecialization() == 'B') {
+                    arrDeploy[indexDeploy++] = 0;
+                } else {
+                    arrDeploy[indexDeploy++] = 1;
                 }
             }
 
@@ -289,7 +339,7 @@ public class Tp1 {
                 if (evalCommand.equals("PANUTAN")) {
                     out.println(panutan(num));
                 } else {
-                    out.println(deploy(num));
+                    deployHelper(num);
                 }
             } else if (evalCommand.equals("KOMPETITIF")) {
                 out.println(kompetitif());
