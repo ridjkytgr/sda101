@@ -1,3 +1,8 @@
+
+/**
+ * Referensi ide: Immanuel (2006463162)
+ */
+
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -50,7 +55,7 @@ public class Tp1 {
     private static int maxR;
 
     // Used to count how many ways to deploy.
-    private static long deployWays;
+    private static double deployWays;
 
     /**
      * Method untuk mencari berapa banyak kang bakso dan kang siomay untuk n-rank
@@ -128,10 +133,10 @@ public class Tp1 {
     public static void deployHelper(int numOfGroups) {
         deployWays = 0;
         deployWays = deploy(1, numOfGroups, arrDeploy[0]);
-        System.out.println(deployWays);
+        System.out.println((long) deployWays);
     }
 
-    public static long deploy(int index, int numOfGroups, int target) {
+    public static double deploy(int index, int numOfGroups, int target) {
         // Base cases
         if (index > arrDeploy.length - 1) { // If index out of bound (ex: [111]1 -> index +
             // 2 error)
@@ -154,7 +159,8 @@ public class Tp1 {
         // Recursive cases
         if (target == arrDeploy[index] && index < arrDeploy.length - 1) {
             // Memperlebar grup dan menghentikan grup saat ini (buat baru lagi)
-            return deploy(index + 1, numOfGroups, target) + deploy(index + 2, numOfGroups - 1, arrDeploy[index + 1]);
+            return (deploy(index + 1, numOfGroups, target) + deploy(index + 2, numOfGroups - 1, arrDeploy[index + 1]))
+                    % (Math.pow(10, 9) + 7);
         } else if (target != arrDeploy[index] && index < arrDeploy.length - 1) {
             // Recursive case: Memperlebar grup (memindahkan pointer)
             return deploy(index + 1, numOfGroups, target);
@@ -212,6 +218,8 @@ public class Tp1 {
         int rankCounter = 1;
         int bakso = 0;
         int siomay = 0;
+
+        // Untuk deploy
         int indexDeploy = 0;
         arrDeploy = new int[agentsData.size()];
 
