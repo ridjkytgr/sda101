@@ -142,9 +142,13 @@ public class Tp1 {
     }
 
     public static void deployHelper(int numOfGroups) {
-        boolChecker = new boolean[1001][501][2];
-        deployWays = deploy(1, numOfGroups, arrDeploy[0]);
-        System.out.println((long) deployWays);
+        if (numOfGroups * 2 > arrDeploy.length) {
+            System.out.println(0);
+        } else {
+            boolChecker = new boolean[1001][501][2];
+            deployWays = deploy(1, numOfGroups, arrDeploy[0]);
+            System.out.println((long) deployWays);
+        }
     }
 
     public static long deploy(int index, int numOfGroups, int target) {
@@ -181,14 +185,14 @@ public class Tp1 {
                     % (1000000007L);
         } else if (target != arrDeploy[index] && index < arrDeploy.length - 1) {
             // Recursive case: Memperlebar grup (memindahkan pointer)
-            temp = deploy(index + 1, numOfGroups, target);
+            temp = deploy(index + 1, numOfGroups, target) % (1000000007L);
         }
 
         // Dynamic programming part
         boolChecker[index][numOfGroups][target] = true;
         dp[index][numOfGroups][target] = temp;
 
-        return temp;
+        return temp % 1000000007L;
     }
 
     /**
@@ -316,6 +320,8 @@ public class Tp1 {
 
         for (int tmp = 0; tmp < batch; tmp++) {
             maxValue = 0;
+            qBakso.clear();
+            qSiomay.clear();
 
             // Make new HashMap instead of clear cause clear has O(N) complexity.
             agentsData = new HashMap<String, Agent>();
