@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.*;
+
 import static java.lang.Math.min;
 import static java.lang.Math.max;
 
@@ -45,6 +46,16 @@ public class Tp1 {
     // Menyimpan urutan-urutan agent yang akan di-deploy (bakso = 0, siomay = 1)
     private static int[] arrDeploy = new int[agentsData.size()];
 
+    // Untuk menyimpan status apakah sudah ditunjuk atau belum.
+    /**
+     * 1001 = Banyak murid maksimal, 501 = Banyak grup maksimal, 2 = Untuk bakso dan
+     * siomay
+     */
+    private static boolean[][][] boolChecker = new boolean[1001][501][2];
+
+    // Untuk menyimpan perhitungan deploy (dynamic programming)
+    private static long[][][] dp = new long[1001][501][2];
+
     // The max ammount of appointments from siesta
     private static int maxValue;
 
@@ -55,7 +66,7 @@ public class Tp1 {
     private static int maxR;
 
     // Used to count how many ways to deploy.
-    private static double deployWays;
+    private static long deployWays;
 
     /**
      * Method untuk mencari berapa banyak kang bakso dan kang siomay untuk n-rank
@@ -131,12 +142,18 @@ public class Tp1 {
     }
 
     public static void deployHelper(int numOfGroups) {
-        deployWays = 0;
+        boolChecker = new boolean[1001][501][2];
         deployWays = deploy(1, numOfGroups, arrDeploy[0]);
         System.out.println((long) deployWays);
     }
 
-    public static double deploy(int index, int numOfGroups, int target) {
+    public static long deploy(int index, int numOfGroups, int target) {
+
+        // Check the saved value.
+        if (boolChecker[index][numOfGroups][target]) {
+            return dp[index][numOfGroups][target];
+        }
+
         // Base cases
         if (index > arrDeploy.length - 1) { // If index out of bound (ex: [111]1 -> index +
             // 2 error)
@@ -156,16 +173,22 @@ public class Tp1 {
             }
         }
 
+        long temp = 0;
         // Recursive cases
         if (target == arrDeploy[index] && index < arrDeploy.length - 1) {
             // Memperlebar grup dan menghentikan grup saat ini (buat baru lagi)
-            return (deploy(index + 1, numOfGroups, target) + deploy(index + 2, numOfGroups - 1, arrDeploy[index + 1]))
-                    % (Math.pow(10, 9) + 7);
+            temp = (deploy(index + 1, numOfGroups, target) + deploy(index + 2, numOfGroups - 1, arrDeploy[index + 1]))
+                    % (1000000007L);
         } else if (target != arrDeploy[index] && index < arrDeploy.length - 1) {
             // Recursive case: Memperlebar grup (memindahkan pointer)
-            return deploy(index + 1, numOfGroups, target);
+            temp = deploy(index + 1, numOfGroups, target);
         }
-        return 0;
+
+        // Dynamic programming part
+        boolChecker[index][numOfGroups][target] = true;
+        dp[index][numOfGroups][target] = temp;
+
+        return temp;
     }
 
     /**
