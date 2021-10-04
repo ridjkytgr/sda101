@@ -8,26 +8,87 @@ import java.util.*;
 
 // TODO - class untuk Lantai
 class Lantai {
+    String element;
+    Lantai next;
 
-    public Lantai() {
+    // Untuk doubly linked list
+    Lantai before;
 
+    // Constructors
+    public Lantai(String theElement, Lantai before, Lantai next) {
+        this.element = theElement;
+        this.before = before;
+        this.next = next;
     }
 
+    public Lantai(String theElement, Lantai before) {
+        this(theElement, before, null);
+    }
+
+    public Lantai(String theElement) {
+        this(theElement, null, null);
+    }
+
+    public Lantai() {
+        this(null, null, null);
+    }
+
+    // Getter
     public String getValue() {
-        return "";
+        return this.element;
+    }
+
+    public Lantai getNext() {
+        return this.next;
+    }
+
+    public Lantai getBefore() {
+        return this.before;
+    }
+
+    // Setter
+    public void setNext(Lantai next) {
+        this.next = next;
+    }
+
+    public void setBefore(Lantai before) {
+        this.before = before;
     }
 
 }
 
 // TODO - class untuk Gedung
 class Gedung {
+    Lantai first;
+    Lantai last;
+    int size;
 
+    // Constructors
     public Gedung() {
+        // Gimmick aja buat masukin ke hashmap pas fondasi B1.
+        this(null);
+    }
 
+    public Gedung(Lantai first) { // Bakal dipanggil kalo pengecekan hashmap pertama ternyata this.first == null.
+        this.first = first;
+        this.last = first;
+        size++;
     }
 
     public void bangun(String input) {
-        // TODO - handle BANGUN
+        Lantai lantaiBangun;
+
+        // Instantiate lantai baru (Node) (Nilai before adalah pointer sebelumnya)
+        lantaiBangun = new Lantai(input, this.last);
+
+        // Arahkan next ke node baru yang telah dibuat
+        this.last.setNext(lantaiBangun);
+
+        // Pindahkan pointer
+        this.last = lantaiBangun;
+
+        // Tambah panjang dari linked list
+        size++;
     }
 
     public void lift(String input) {
@@ -47,6 +108,14 @@ class Gedung {
         return "";
     }
 
+    public Lantai getFirst() {
+        return this.first;
+    }
+
+    public int size() {
+        return this.size;
+    }
+
 }
 
 public class Lab4 {
@@ -60,6 +129,9 @@ public class Lab4 {
         OutputStream outputStream = System.out;
         out = new PrintWriter(outputStream);
 
+        // Struktur data tambahan
+        Map<String, Gedung> seluruhGedung = new HashMap<String, Gedung>();
+
         // N operations
         int N = in.nextInt();
         String cmd;
@@ -72,10 +144,20 @@ public class Lab4 {
             if (cmd.equals("FONDASI")) {
                 String A = in.next();
 
+                // Initialize gedung
+                seluruhGedung.put(A, new Gedung());
+
             } else if (cmd.equals("BANGUN")) {
                 String A = in.next();
                 String X = in.next();
-                // TODO
+
+                // Bangun paling pertama
+                if (seluruhGedung.get(A).getFirst() == null) {
+                    // Overwrite data di hashmap.
+                    seluruhGedung.put(A, new Gedung(new Lantai(X)));
+                } else { // Jika sudah ada yang dibangun sebelumnya.
+                    seluruhGedung.get(A).bangun(X);
+                }
 
             } else if (cmd.equals("LIFT")) {
                 String A = in.next();
