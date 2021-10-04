@@ -154,13 +154,23 @@ class Gedung {
                 this.pointer = this.pointer.getBefore();
                 this.pointer.setNext(null);
                 this.last = this.pointer;
+
+                pointerInt--;
+            } else if (pointerInt == 1) {
+                this.pointer = null;
+                this.pointer = this.last;
+
+                pointerInt = size - 1;
             } else {
                 Lantai nextBaru = this.pointer.getNext();
 
                 // Agar tidak hilang referensi
                 this.pointer.getBefore().setNext(nextBaru);
                 this.pointer = this.pointer.getBefore();
+
+                pointerInt--;
             }
+
         } else {
             this.first = null;
             this.last = null;
