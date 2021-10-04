@@ -128,7 +128,7 @@ class Gedung {
         size++;
     }
 
-    public void lift(String input) {
+    public String lift(String input) {
         // Memindahkan pointer jika
         if (input.equals("BAWAH")) {
             // Memindahkan pointer ke bawah
@@ -141,10 +141,10 @@ class Gedung {
         }
 
         // Mencetak letak pointer
-        System.out.println(this.pointer.getValue());
+        return this.pointer.getValue();
     }
 
-    public void hancurkan() {
+    public String hancurkan() {
         // Untuk dicetak
         Lantai lantaiDihancurkan = this.pointer;
 
@@ -167,10 +167,11 @@ class Gedung {
             this.pointer = null;
         }
 
-        // Pencetakan
-        System.out.println(lantaiDihancurkan.getValue());
-
         size--;
+
+        // Pencetakan
+        return lantaiDihancurkan.getValue();
+
     }
 
     public void timpa(Gedung gedungNimpa) {
@@ -243,7 +244,7 @@ public class Lab4 {
                 String A = in.next();
                 String X = in.next();
 
-                seluruhGedung.get(A).lift(X);
+                out.println(seluruhGedung.get(A).lift(X));
 
             } else if (cmd.equals("SKETSA")) {
                 String A = in.next();
@@ -264,7 +265,7 @@ public class Lab4 {
             } else if (cmd.equals("HANCURKAN")) {
                 String A = in.next();
 
-                seluruhGedung.get(A).hancurkan();
+                out.println(seluruhGedung.get(A).hancurkan());
             }
         }
 
