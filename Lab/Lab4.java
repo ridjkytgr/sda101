@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.*;
 
-// TODO - class untuk Lantai
 class Lantai {
     String element;
     Lantai next;
@@ -57,11 +56,12 @@ class Lantai {
 
 }
 
-// TODO - class untuk Gedung
 class Gedung {
     Lantai first;
     Lantai last;
+    Lantai pointer;
     int size;
+    int pointerInt;
 
     // Constructors
     public Gedung() {
@@ -72,20 +72,57 @@ class Gedung {
     public Gedung(Lantai first) { // Bakal dipanggil kalo pengecekan hashmap pertama ternyata this.first == null.
         this.first = first;
         this.last = first;
+        this.pointer = first;
         size++;
+        pointerInt = 1;
     }
 
+    // Getter
+    public Lantai getFirst() {
+        return this.first;
+    }
+
+    public Lantai getLast() {
+        return this.last;
+    }
+
+    public Lantai getPointer() {
+        return this.pointer;
+    }
+
+    public int getPointerInt() {
+        return this.pointerInt;
+    }
+
+    public int size() {
+        return this.size;
+    }
+
+    // Questions
     public void bangun(String input) {
-        Lantai lantaiBangun;
-
         // Instantiate lantai baru (Node) (Nilai before adalah pointer sebelumnya)
-        lantaiBangun = new Lantai(input, this.last);
+        Lantai lantaiBangun = new Lantai(input, this.last);
 
-        // Arahkan next ke node baru yang telah dibuat
-        this.last.setNext(lantaiBangun);
+        if (pointerInt == size) {
+            // Arahkan next ke node baru yang telah dibuat
+            this.pointer.setNext(lantaiBangun);
 
-        // Pindahkan pointer
-        this.last = lantaiBangun;
+            // Pindahkan pointer
+            this.pointer = lantaiBangun;
+            this.last = lantaiBangun;
+
+            pointerInt++;
+        } else {
+            // Mengarahkan yang baru agar tidak melepas referensi
+            lantaiBangun.setNext(this.pointer.getNext());
+
+            this.pointer.setNext(lantaiBangun);
+
+            // Memindahkan pointer
+            this.pointer = lantaiBangun;
+
+            pointerInt++;
+        }
 
         // Tambah panjang dari linked list
         size++;
@@ -95,24 +132,39 @@ class Gedung {
         // Memindahkan pointer jika
         if (input.equals("BAWAH")) {
             // Memindahkan pointer ke bawah
-            this.last = this.last.getBefore();
+            this.pointer = this.pointer.getBefore();
+            pointerInt--;
         } else {
             // Memindahkan pointer ke atas
-            this.last = this.last.getNext();
+            this.pointer = this.pointer.getNext();
+            pointerInt++;
         }
+
+        // Mencetak letak pointer
+        System.out.println(this.pointer.getValue());
     }
 
     public void hancurkan() {
         // Untuk dicetak
-        Lantai lantaiDihancurkan = this.last;
+        Lantai lantaiDihancurkan = this.pointer;
 
         // Pindahkan pointer ke bawah
         if (size > 1) {
-            this.last = this.last.getBefore();
-            this.last.setNext(null);
+            if (pointerInt == size) {
+                this.pointer = this.pointer.getBefore();
+                this.pointer.setNext(null);
+                this.last = this.pointer;
+            } else {
+                Lantai nextBaru = this.pointer.getNext();
+
+                // Agar tidak hilang referensi
+                this.pointer.getBefore().setNext(nextBaru);
+                this.pointer = this.pointer.getBefore();
+            }
         } else {
-            this.last = null;
             this.first = null;
+            this.last = null;
+            this.pointer = null;
         }
 
         // Pencetakan
@@ -121,8 +173,13 @@ class Gedung {
         size--;
     }
 
-    public void timpa(String input) {
+    public void timpa(Gedung gedungNimpa) {
+        // Menyambungkan pointer
+        this.last.setNext(gedungNimpa.getFirst());
+        gedungNimpa.getFirst().setBefore(this.last);
 
+        // Menambahkan size gedung
+        size += gedungNimpa.size();
     }
 
     public String sketsa() {
@@ -139,15 +196,6 @@ class Gedung {
 
         return sketsa.toString();
     }
-
-    public Lantai getFirst() {
-        return this.first;
-    }
-
-    public int size() {
-        return this.size;
-    }
-
 }
 
 public class Lab4 {
@@ -208,7 +256,10 @@ public class Lab4 {
                 /**
                  * Memindahkan last next A ke first B, dan before first B ke last A.
                  */
-                seluruhGedung.get(A).timpa(B);
+                seluruhGedung.get(A).timpa(seluruhGedung.get(B));
+
+                // Menghapus gedung B
+                seluruhGedung.remove(B);
 
             } else if (cmd.equals("HANCURKAN")) {
                 String A = in.next();
