@@ -20,16 +20,8 @@ class Lantai {
         this.next = next;
     }
 
-    public Lantai(String theElement, Lantai before) {
-        this(theElement, before, null);
-    }
-
     public Lantai(String theElement) {
         this(theElement, null, null);
-    }
-
-    public Lantai() {
-        this(null, null, null);
     }
 
     // Getter
@@ -73,7 +65,7 @@ class Gedung {
         this.first = first;
         this.last = first;
         this.pointer = first;
-        size++;
+        size = 1;
         pointerInt = 1;
     }
 
@@ -101,22 +93,26 @@ class Gedung {
     // Questions
     public void bangun(String input) {
         // Instantiate lantai baru (Node) (Nilai before adalah pointer sebelumnya)
-        Lantai lantaiBangun = new Lantai(input, this.last);
+        Lantai lantaiBangun = new Lantai(input);
 
-        if (pointerInt == size) {
+        if (pointerInt == size && this.pointer != null) { // Agen paling atas
             // Arahkan next ke node baru yang telah dibuat
             this.pointer.setNext(lantaiBangun);
+            lantaiBangun.setBefore(this.pointer);
 
             // Pindahkan pointer
             this.pointer = lantaiBangun;
             this.last = lantaiBangun;
 
             pointerInt++;
-        } else {
+        } else if (pointerInt != size && this.pointer != null) { // Agen di tengah
             // Mengarahkan yang baru agar tidak melepas referensi
             lantaiBangun.setNext(this.pointer.getNext());
+            this.pointer.getNext().setBefore(lantaiBangun);
 
+            // Memindahkan pointer
             this.pointer.setNext(lantaiBangun);
+            lantaiBangun.setBefore(this.pointer);
 
             // Memindahkan pointer
             this.pointer = lantaiBangun;
@@ -129,68 +125,97 @@ class Gedung {
     }
 
     public String lift(String input) {
-        // Memindahkan pointer jika
-        if (input.equals("BAWAH")) {
-            // Memindahkan pointer ke bawah
-            this.pointer = this.pointer.getBefore();
-            pointerInt--;
-        } else {
-            // Memindahkan pointer ke atas
-            this.pointer = this.pointer.getNext();
-            pointerInt++;
-        }
+        if (this.pointer != null) {
+            if (size == 1) { // Jika hanya 1 lantai
+                return this.pointer.getValue();
+            } else {
+                // Memindahkan pointer jika
+                if (input.equals("BAWAH")) {
+                    if (pointerInt == 1) { // Jika agen ada di paling bawah
+                        return this.pointer.getValue();
+                    } else {
+                        // Memindahkan pointer ke bawah
+                        this.pointer = this.pointer.getBefore();
+                        pointerInt--;
 
-        // Mencetak letak pointer
-        return this.pointer.getValue();
+                        return this.pointer.getValue();
+                    }
+                } else { // Jika naik ke atas
+                    if (pointerInt == size) { // Jika agen ada di paling atas
+                        return this.pointer.getValue();
+                    } else {
+                        // Memindahkan pointer ke atas
+                        this.pointer = this.pointer.getNext();
+                        pointerInt++;
+
+                        return this.pointer.getValue();
+                    }
+                }
+            }
+        }
+        return "";
     }
 
     public String hancurkan() {
-        // Untuk dicetak
-        Lantai lantaiDihancurkan = this.pointer;
+        if (this.pointer != null) {
+            // Untuk dicetak
+            Lantai lantaiDihancurkan = this.pointer;
 
-        // Pindahkan pointer ke bawah
-        if (size > 1) {
-            if (pointerInt == size) {
-                this.pointer = this.pointer.getBefore();
-                this.pointer.setNext(null);
-                this.last = this.pointer;
+            // Pindahkan pointer ke bawah
+            if (size > 1) {
+                if (pointerInt == size) { // Agen di paling atas
+                    Lantai beforeBaru = this.pointer.getBefore();
 
-                pointerInt--;
-            } else if (pointerInt == 1) {
-                this.pointer = null;
-                this.pointer = this.last;
+                    this.pointer = null;
+                    this.pointer = beforeBaru;
+                    this.last = this.pointer;
 
-                pointerInt = size - 1;
+                    pointerInt--;
+                } else if (pointerInt == 1) { // Agen di paling bawah
+                    this.first = this.pointer.getNext();
+                    this.pointer = null;
+                    this.pointer = this.first;
+
+                    pointerInt = 1;
+                } else { // Agen di tengah
+                    Lantai nextBaru = this.pointer.getNext();
+
+                    // Agar tidak hilang referensi
+                    this.pointer.getBefore().setNext(nextBaru);
+                    nextBaru.setBefore(this.pointer.getBefore());
+
+                    this.pointer = this.pointer.getBefore();
+
+                    pointerInt--;
+                }
+
             } else {
-                Lantai nextBaru = this.pointer.getNext();
-
-                // Agar tidak hilang referensi
-                this.pointer.getBefore().setNext(nextBaru);
-                this.pointer = this.pointer.getBefore();
-
-                pointerInt--;
+                this.first = null;
+                this.last = null;
+                this.pointer = null;
             }
 
-        } else {
-            this.first = null;
-            this.last = null;
-            this.pointer = null;
+            size--;
+
+            // Pencetakan
+            return lantaiDihancurkan.getValue();
         }
-
-        size--;
-
-        // Pencetakan
-        return lantaiDihancurkan.getValue();
+        return "";
 
     }
 
     public void timpa(Gedung gedungNimpa) {
         // Menyambungkan pointer
-        this.last.setNext(gedungNimpa.getFirst());
-        gedungNimpa.getFirst().setBefore(this.last);
+        if (this.last != null && gedungNimpa.getFirst() != null) {
+            this.last.setNext(gedungNimpa.getFirst());
+            gedungNimpa.getFirst().setBefore(this.last);
 
-        // Menambahkan size gedung
-        size += gedungNimpa.size();
+            // Pindahkan last ke paling atas
+            this.last = gedungNimpa.getLast();
+
+            // Menambahkan size gedung
+            size += gedungNimpa.size();
+        }
     }
 
     public String sketsa() {
@@ -198,13 +223,14 @@ class Gedung {
 
         Lantai first = this.first;
         for (int i = 0; i < size; i++) {
-            // Append stringbuilder
-            sketsa.append(first.getValue());
+            if (first != null) {
+                // Append stringbuilder
+                sketsa.append(first.getValue());
 
-            // Memindahkan pointer
-            first = first.getNext();
+                // Memindahkan pointer
+                first = first.getNext();
+            }
         }
-
         return sketsa.toString();
     }
 }
@@ -254,11 +280,16 @@ public class Lab4 {
                 String A = in.next();
                 String X = in.next();
 
-                out.println(seluruhGedung.get(A).lift(X));
+                String output = seluruhGedung.get(A).lift(X);
+
+                out.println(output);
 
             } else if (cmd.equals("SKETSA")) {
                 String A = in.next();
-                out.println(seluruhGedung.get(A).sketsa());
+
+                String output = seluruhGedung.get(A).sketsa();
+
+                out.println(output);
 
             } else if (cmd.equals("TIMPA")) {
                 String A = in.next();
@@ -275,12 +306,14 @@ public class Lab4 {
             } else if (cmd.equals("HANCURKAN")) {
                 String A = in.next();
 
-                out.println(seluruhGedung.get(A).hancurkan());
+                String output = seluruhGedung.get(A).hancurkan();
+
+                out.println(output);
             }
         }
 
         // don't forget to close/flush the output
-        out.close();
+        out.flush();
     }
 
     // taken from https://codeforces.com/submissions/Petr
