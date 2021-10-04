@@ -92,20 +92,52 @@ class Gedung {
     }
 
     public void lift(String input) {
-        // TODO - handle LIFT
+        // Memindahkan pointer jika
+        if (input.equals("BAWAH")) {
+            // Memindahkan pointer ke bawah
+            this.last = this.last.getBefore();
+        } else {
+            // Memindahkan pointer ke atas
+            this.last = this.last.getNext();
+        }
     }
 
     public void hancurkan() {
-        // TODO - handle HANCURKAN
+        // Untuk dicetak
+        Lantai lantaiDihancurkan = this.last;
+
+        // Pindahkan pointer ke bawah
+        if (size > 1) {
+            this.last = this.last.getBefore();
+            this.last.setNext(null);
+        } else {
+            this.last = null;
+            this.first = null;
+        }
+
+        // Pencetakan
+        System.out.println(lantaiDihancurkan.getValue());
+
+        size--;
     }
 
     public void timpa(String input) {
-        // TODO - handle TIMPA
+
     }
 
     public String sketsa() {
-        // TODO - handle SKETSA
-        return "";
+        StringBuilder sketsa = new StringBuilder("");
+
+        Lantai first = this.first;
+        for (int i = 0; i < size; i++) {
+            // Append stringbuilder
+            sketsa.append(first.getValue());
+
+            // Memindahkan pointer
+            first = first.getNext();
+        }
+
+        return sketsa.toString();
     }
 
     public Lantai getFirst() {
@@ -162,20 +194,26 @@ public class Lab4 {
             } else if (cmd.equals("LIFT")) {
                 String A = in.next();
                 String X = in.next();
-                // TODO
+
+                seluruhGedung.get(A).lift(X);
 
             } else if (cmd.equals("SKETSA")) {
                 String A = in.next();
-                // TODO
+                out.println(seluruhGedung.get(A).sketsa());
 
             } else if (cmd.equals("TIMPA")) {
                 String A = in.next();
                 String B = in.next();
-                // TODO
+
+                /**
+                 * Memindahkan last next A ke first B, dan before first B ke last A.
+                 */
+                seluruhGedung.get(A).timpa(B);
 
             } else if (cmd.equals("HANCURKAN")) {
                 String A = in.next();
-                // TODO
+
+                seluruhGedung.get(A).hancurkan();
             }
         }
 
