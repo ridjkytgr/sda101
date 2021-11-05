@@ -261,9 +261,8 @@ public class Tp1 {
             // Normalisasi rank dari masing-masing agent.
             pqData.peek().setLastRankAndStatus();
 
-            // Mengisi HashMap jika sudah hari terakhir (Untuk panutan)
-
             if (day == days - 1) {
+                // Mengisi HashMap jika sudah hari terakhir (Untuk panutan)
                 if (pqData.peek().getSpecialization() == 'B') {
                     bakso++;
                 } else {
