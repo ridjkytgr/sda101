@@ -127,6 +127,7 @@ class Pulau {
         // Instantiate Dataran baru (Node) (Nilai before adalah pointer sebelumnya)
         if (this.first == null) { // Untuk Dataran yang paling kiri (memiliki kuil)
             pulauBangun = new Dataran(namaKuil, tinggi);
+            pulauBangun.setIsKuil(true);
             this.first = pulauBangun;
             this.last = pulauBangun;
             this.raiden = pulauBangun;
@@ -245,6 +246,72 @@ class Pulau {
 
         return this.raiden.getPrevious().getTinggi();
     }
+
+    public int crumble() {
+        int tinggiDihancurkan = this.raiden.getTinggi();
+
+        // Hilangkan daratan lalu pindahkan raiden ke kiri.
+        if (this.raiden.getIsKuil()) { // Kalo kuil langsung return 0.
+            return 0;
+        }
+
+        if (this.raiden.equals(this.last)) { // Jika raiden ada di Dataran paling kanan
+            Dataran beforeBaru = this.raiden.getPrevious();
+
+            this.raiden = null;
+            this.raiden = beforeBaru;
+            this.last = this.raiden;
+
+            this.size--;
+        } else if (this.raiden.equals(this.first)) { // Jika raiden ada di Dataran paling kiri (Di kuil)
+            return 0;
+        } else { // Kalo raiden ada di tengah.
+            Dataran nextBaru = this.raiden.getNext();
+
+            // Agar tidak kehilangan referensi
+            this.raiden.getPrevious().setNext(nextBaru);
+            nextBaru.setPrevious(this.raiden.getPrevious());
+
+            // Memindahkan raiden ke belakang
+            this.raiden = this.raiden.getPrevious();
+
+            this.size--;
+        }
+
+        return tinggiDihancurkan;
+    }
+
+    public int stabilize() {
+        if (this.raiden.getIsKuil() || this.raiden.equals(this.first)) {
+            return 0;
+        }
+
+        // Menyimpan tinggi dataran yang lebih rendah ke variabel x
+        int x = this.raiden.getTinggi() > this.raiden.getPrevious().getTinggi() ? this.raiden.getPrevious().getTinggi()
+                : this.raiden.getTinggi();
+
+        // Bikin dataran baru yang memiliki tinggi lebih rendah.
+        Dataran dataranStabilize = new Dataran(x);
+
+        if (this.raiden.equals(this.last)) { // Raiden shogun di paling kanan
+            // Mengarahkan next dan previous.
+            this.raiden.setNext(dataranStabilize);
+            dataranStabilize.setPrevious(this.raiden);
+
+            // Memindahkan last.
+            this.last = dataranStabilize;
+        } else { // Raiden shogun di tengah (ga mungkin pertama karena kuil)
+            // Mengarahkan next dan previous agar tidak hilang (sisi kanan Dataran baru)
+            dataranStabilize.setNext(this.raiden.getNext());
+            this.raiden.getNext().setPrevious(dataranStabilize);
+
+            // Mengarahkan next dan previous agar tidak hilang (sisi kiri Dataran baru)
+            this.raiden.setNext(dataranStabilize);
+            dataranStabilize.setPrevious(this.raiden);
+        }
+
+        return dataranStabilize.getTinggi();
+    }
 }
 
 public class TP2 {
@@ -362,6 +429,10 @@ public class TP2 {
                     out.println(tempatRaiden.tebasKanan(in.nextInt()));
 
                 }
+            } else if (cmd.equals("CRUMBLE")) {
+                out.println(tempatRaiden.crumble());
+            } else if (cmd.equals("STABILIZE")) {
+                out.println(tempatRaiden.stabilize());
             }
         }
 
