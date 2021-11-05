@@ -217,6 +217,34 @@ class Pulau {
 
         return this.raiden.getTinggi();
     }
+
+    public int tebasKiri(int s) {
+        int tinggiSebelumnya = this.raiden.getTinggi();
+
+        while (s > 0 && !this.raiden.equals(this.first)) {
+            this.raiden = this.raiden.getPrevious();
+
+            if (this.raiden.getTinggi() == tinggiSebelumnya) {
+                s--;
+            }
+        }
+
+        return this.raiden.getNext().getTinggi();
+    }
+
+    public int tebasKanan(int s) {
+        int tinggiSebelumnya = this.raiden.getTinggi();
+
+        while (s > 0 && !this.raiden.equals(this.last)) {
+            this.raiden = this.raiden.getNext();
+
+            if (this.raiden.getTinggi() == tinggiSebelumnya) {
+                s--;
+            }
+        }
+
+        return this.raiden.getPrevious().getTinggi();
+    }
 }
 
 public class TP2 {
@@ -326,7 +354,14 @@ public class TP2 {
                 Pulau kuilRaiden = seluruhKuil.get(kuilTeleportasi);
 
                 out.println(kuilRaiden.teleportasi(kuilTeleportasi));
+            } else if (cmd.equals("TEBAS")) {
+                String arah = in.next();
+                if (arah.equals("KIRI")) {
+                    out.println(tempatRaiden.tebasKiri(in.nextInt()));
+                } else {
+                    out.println(tempatRaiden.tebasKanan(in.nextInt()));
 
+                }
             }
         }
 
