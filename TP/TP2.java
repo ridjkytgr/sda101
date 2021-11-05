@@ -89,7 +89,7 @@ class Pulau {
     public Pulau(Dataran first) { // Bakal dipanggil kalo pengecekan hashmap pertama ternyata this.first == null.
         this.first = first;
         this.last = first;
-        this.raiden = null;
+        this.raiden = first;
         size = 1;
     }
 
@@ -129,6 +129,7 @@ class Pulau {
             pulauBangun = new Dataran(namaKuil, tinggi);
             this.first = pulauBangun;
             this.last = pulauBangun;
+            this.raiden = pulauBangun;
         } else { // Untuk Dataran yang bukan paling kiri (non-kuil)
             pulauBangun = new Dataran(namaKuil, tinggi);
 
@@ -181,6 +182,41 @@ class Pulau {
         return new Pulau[] { pulauKiri, pulauKanan };
     }
 
+    public int gerakKiri(int s) {
+        for (int step = 0; step < s; step++) {
+            this.raiden = this.raiden.getPrevious();
+
+            // Jika sudah berada di paling kiri.
+            if (this.raiden.equals(this.getFirst())) {
+                break;
+            }
+        }
+        return this.raiden.getTinggi();
+    }
+
+    public int gerakKanan(int s) {
+        for (int step = 0; step < s; step++) {
+            this.raiden = this.raiden.getNext();
+
+            // Jika sudah berada di paling kanan.
+            if (this.raiden.equals(this.getLast())) {
+                break;
+            }
+        }
+        return this.raiden.getTinggi();
+    }
+
+    public int teleportasi(String namaKuil) {
+        while (this.raiden.getNext() != null) {
+            if (this.raiden.getNamaKuil().equals(namaKuil)) {
+                break;
+            }
+
+            this.raiden = this.raiden.getNext();
+        }
+
+        return this.raiden.getTinggi();
+    }
 }
 
 public class TP2 {
@@ -229,8 +265,11 @@ public class TP2 {
         // Set pointer raiden
         Dataran raiden = tempatRaiden.getRaiden();
         raiden = tempatRaiden.getFirst();
-        for (int count = 0; count < dataranRaiden - 1; count++) {
-            raiden = raiden.getNext();
+
+        if (dataranRaiden >= 2) {
+            for (int count = 0; count < dataranRaiden - 1; count++) {
+                raiden = raiden.getNext();
+            }
         }
 
         // Command dari Archons
@@ -273,6 +312,21 @@ public class TP2 {
 
                 // Cetak hasilnya
                 out.println(pulauTerpisah[0].size() + " " + pulauTerpisah[1].size());
+            } else if (cmd.equals("GERAK")) {
+                String arah = in.next();
+                if (arah.equals("KIRI")) {
+                    out.println(tempatRaiden.gerakKiri(in.nextInt()));
+                } else {
+                    out.println(tempatRaiden.gerakKanan(in.nextInt()));
+                }
+            } else if (cmd.equals("TELEPORTASI")) {
+                String kuilTeleportasi = in.next();
+
+                // Cari kuil tempat Raiden harus diteleportasi
+                Pulau kuilRaiden = seluruhKuil.get(kuilTeleportasi);
+
+                out.println(kuilRaiden.teleportasi(kuilTeleportasi));
+
             }
         }
 
