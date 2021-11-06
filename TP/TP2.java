@@ -37,6 +37,10 @@ class Dataran {
         this(namaKuil, 0, null, null);
     }
 
+    public Dataran() {
+        this(null, 0, null, null);
+    }
+
     // Getter
     public String getNamaKuil() {
         return this.namaKuil;
@@ -87,7 +91,7 @@ class Pulau {
     }
 
     public Pulau(Dataran first) { // Bakal dipanggil kalo pengecekan hashmap pertama ternyata this.first == null.
-        first.setIsKuil(true);
+        // first.setIsKuil(true);
         this.first = first;
         this.last = first;
         this.raiden = first;
@@ -160,26 +164,37 @@ class Pulau {
     }
 
     public Pulau[] pisah(String namaKuil) {
-        // Current pointer
-        Dataran traverse = this.first;
+        // Current pointer (kuil kanan)
+        Dataran traverseKuil2 = this.first;
+
+        // Current pointer (kuil kiri)
+        Dataran traverseKuil1 = this.first.getPrevious();
+
+        // Untuk memotong linked list
+        traverseKuil2.setPrevious(null);
+        traverseKuil1.setNext(null);
+
+        // Reset pointer sampe ke pointer awal
+        while (traverseKuil1.getPrevious() != null) {
+            traverseKuil1 = traverseKuil1.getPrevious();
+        }
 
         // Pulau yang berada di kiri kuil U.
-        Pulau pulauKiri = new Pulau(traverse);
+        Pulau pulauKiri = new Pulau(traverseKuil1);
 
         // Membentuk pulau kiri
-        while (traverse.getNext() != null && !traverse.getNext().getNamaKuil().equals(namaKuil)) {
-            traverse = traverse.getNext();
-            pulauKiri.bangun(traverse.getNamaKuil(), traverse.getTinggi());
+        while (traverseKuil1.getNext() != null && !traverseKuil1.getNext().getNamaKuil().equals(namaKuil)) {
+            traverseKuil1 = traverseKuil1.getNext();
+            pulauKiri.bangun(traverseKuil1.getNamaKuil(), traverseKuil1.getTinggi());
         }
 
         // Pulau yang berada di kanan kuil U (termasuk kuil U).
-        traverse = traverse.getNext();
-        Pulau pulauKanan = new Pulau(traverse);
+        Pulau pulauKanan = new Pulau(traverseKuil2);
 
         // Membuat pulau kanan
-        while (traverse.getNext() != null) {
-            traverse = traverse.getNext();
-            pulauKanan.bangun(traverse.getNamaKuil(), traverse.getTinggi());
+        while (traverseKuil2.getNext() != null) {
+            traverseKuil2 = traverseKuil2.getNext();
+            pulauKanan.bangun(traverseKuil2.getNamaKuil(), traverseKuil2.getTinggi());
         }
         return new Pulau[] { pulauKiri, pulauKanan };
     }
@@ -384,17 +399,8 @@ public class TP2 {
                 // Lakukan proses unifikasi
                 seluruhPulau.get(pulauU).unifikasi(seluruhPulau.get(pulauV));
 
-                // Timpa hashmap seluruh pulau dengan pulau yang besar
-                seluruhPulau.put(pulauU, seluruhPulau.get(pulauU));
-
                 // Hapus pulau yang kecil
                 seluruhPulau.remove(pulauV);
-
-                // Timpa kuil yang kecil jadi pulau yang besar
-                seluruhKuil.put(pulauV, seluruhPulau.get(pulauU));
-
-                // Timpa kuil pulau yang besar terhadap gabungan pulau tersebut (unifikasi)
-                seluruhKuil.put(pulauU, seluruhPulau.get(pulauU));
 
                 // Cetak berapa banyak dataran di pulau baru.
                 out.println(seluruhPulau.get(pulauU).size());
@@ -403,8 +409,8 @@ public class TP2 {
                 Pulau[] pulauTerpisah = seluruhKuil.get(kuilU).pisah(kuilU);
 
                 // Timpa untuk kuil yang ada di sebelah kiri U.
-                seluruhKuil.put(seluruhKuil.get(kuilU).getFirst().getNamaKuil(), pulauTerpisah[0]);
-                seluruhPulau.put(seluruhKuil.get(kuilU).getFirst().getNamaKuil(), pulauTerpisah[0]);
+                seluruhKuil.put(pulauTerpisah[0].getFirst().getNamaKuil(), pulauTerpisah[0]);
+                seluruhPulau.put(pulauTerpisah[0].getFirst().getNamaKuil(), pulauTerpisah[0]);
 
                 // Timpa untuk kuil yang ada di sebelah kanan U.
                 seluruhKuil.put(kuilU, pulauTerpisah[1]);
