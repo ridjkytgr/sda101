@@ -87,6 +87,7 @@ class Pulau {
     }
 
     public Pulau(Dataran first) { // Bakal dipanggil kalo pengecekan hashmap pertama ternyata this.first == null.
+        first.setIsKuil(true);
         this.first = first;
         this.last = first;
         this.raiden = first;
@@ -445,6 +446,38 @@ public class TP2 {
 
         // don't forget to close/flush the output
         out.flush();
+
+    }
+
+    /**
+     * Printing LinkedList (for debugging purposes)
+     * 
+     * @param ll LinkedLIst that wanna be printed
+     */
+    public static void printLL(Pulau ll) {
+        StringBuilder sb = new StringBuilder();
+
+        Dataran current = ll.getFirst();
+        while (current != null) {
+            sb.append(current.getTinggi());
+            sb.append(" ");
+            current = current.getNext();
+        }
+
+        out.println(sb);
+    }
+
+    /**
+     * Printing HashMap (for debugging purposes)
+     * 
+     * @param hm Hashmap that wanna be printed
+     */
+    public static void printHM(Map<String, Pulau> hm) {
+        hm.forEach((key, value) -> {
+            out.println(key);
+            printLL(value);
+            out.println("==============================");
+        });
     }
 
     // taken from https://codeforces.com/submissions/Petr
