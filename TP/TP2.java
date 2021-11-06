@@ -185,31 +185,31 @@ class Pulau {
 
     public int gerakKiri(int s) {
         for (int step = 0; step < s; step++) {
-            this.raiden = this.raiden.getPrevious();
-
             // Jika sudah berada di paling kiri.
             if (this.raiden.equals(this.getFirst())) {
                 break;
             }
+
+            this.raiden = this.raiden.getPrevious();
         }
         return this.raiden.getTinggi();
     }
 
     public int gerakKanan(int s) {
         for (int step = 0; step < s; step++) {
-            this.raiden = this.raiden.getNext();
-
             // Jika sudah berada di paling kanan.
             if (this.raiden.equals(this.getLast())) {
                 break;
             }
+
+            this.raiden = this.raiden.getNext();
         }
         return this.raiden.getTinggi();
     }
 
     public int teleportasi(String namaKuil) {
         while (this.raiden.getNext() != null) {
-            if (this.raiden.getNamaKuil().equals(namaKuil)) {
+            if (this.raiden.getIsKuil() && this.raiden.getNamaKuil().equals(namaKuil)) {
                 break;
             }
 
@@ -355,6 +355,10 @@ public class TP2 {
         String pulauRaiden = in.next();
         int dataranRaiden = in.nextInt();
 
+        // Menyimpan posisi Raiden jika nanti melakukan teleportasi.
+        String currentRaiden = pulauRaiden;
+
+        // Mencari pulau tempat Raiden.
         Pulau tempatRaiden = seluruhPulau.get(pulauRaiden);
 
         // Set pointer raiden
@@ -410,12 +414,15 @@ public class TP2 {
             } else if (cmd.equals("GERAK")) {
                 String arah = in.next();
                 if (arah.equals("KIRI")) {
-                    out.println(tempatRaiden.gerakKiri(in.nextInt()));
+                    out.println(seluruhKuil.get(currentRaiden).gerakKiri(in.nextInt()));
                 } else {
-                    out.println(tempatRaiden.gerakKanan(in.nextInt()));
+                    out.println(seluruhKuil.get(currentRaiden).gerakKanan(in.nextInt()));
                 }
             } else if (cmd.equals("TELEPORTASI")) {
                 String kuilTeleportasi = in.next();
+
+                // Pindahkan letak raiden.
+                currentRaiden = kuilTeleportasi;
 
                 // Cari kuil tempat Raiden harus diteleportasi
                 Pulau kuilRaiden = seluruhKuil.get(kuilTeleportasi);
@@ -424,15 +431,15 @@ public class TP2 {
             } else if (cmd.equals("TEBAS")) {
                 String arah = in.next();
                 if (arah.equals("KIRI")) {
-                    out.println(tempatRaiden.tebasKiri(in.nextInt()));
+                    out.println(seluruhKuil.get(currentRaiden).tebasKiri(in.nextInt()));
                 } else {
-                    out.println(tempatRaiden.tebasKanan(in.nextInt()));
+                    out.println(seluruhKuil.get(currentRaiden).tebasKanan(in.nextInt()));
 
                 }
             } else if (cmd.equals("CRUMBLE")) {
-                out.println(tempatRaiden.crumble());
+                out.println(seluruhKuil.get(currentRaiden).crumble());
             } else if (cmd.equals("STABILIZE")) {
-                out.println(tempatRaiden.stabilize());
+                out.println(seluruhKuil.get(currentRaiden).stabilize());
             }
         }
 
