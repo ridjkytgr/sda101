@@ -82,6 +82,10 @@ class Pulau {
     Dataran raiden;
     int size;
 
+    // Nested linked list
+    Pulau next;
+    Pulau previous;
+
     // Constructors
     public Pulau() {
         this.first = null;
@@ -115,9 +119,25 @@ class Pulau {
         return this.size;
     }
 
+    public Pulau getNextPulau() {
+        return this.next;
+    }
+
+    public Pulau getPreviousPulau() {
+        return this.previous;
+    }
+
     // Setter
     public void setSize(int size) {
         this.size = size;
+    }
+
+    public void setNextPulau(Pulau pulau) {
+        this.next = pulau;
+    }
+
+    public void setPreviousPulau(Pulau pulau) {
+        this.previous = pulau;
     }
 
     /**
@@ -163,7 +183,9 @@ class Pulau {
         }
     }
 
-    public Pulau[] pisah(String namaKuil) {
+    public StringBuilder pisah(Pulau pulauBesar) {
+        StringBuilder sb = new StringBuilder();
+
         // Current pointer (kuil kanan)
         Dataran traverseKuil2 = this.first;
 
@@ -174,29 +196,17 @@ class Pulau {
         traverseKuil2.setPrevious(null);
         traverseKuil1.setNext(null);
 
-        // Reset pointer sampe ke pointer awal
-        while (traverseKuil1.getPrevious() != null) {
-            traverseKuil1 = traverseKuil1.getPrevious();
-        }
+        // Benar-benar memotong linked list
+        pulauBesar.last = traverseKuil1;
 
-        // Pulau yang berada di kiri kuil U.
-        Pulau pulauKiri = new Pulau(traverseKuil1);
+        pulauBesar.setSize(pulauBesar.size() - this.size());
 
-        // Membentuk pulau kiri
-        while (traverseKuil1.getNext() != null && !traverseKuil1.getNext().getNamaKuil().equals(namaKuil)) {
-            traverseKuil1 = traverseKuil1.getNext();
-            pulauKiri.bangun(traverseKuil1.getNamaKuil(), traverseKuil1.getTinggi());
-        }
+        // Untuk dicetak
+        sb.append(pulauBesar.size());
+        sb.append(" ");
+        sb.append(this.size());
 
-        // Pulau yang berada di kanan kuil U (termasuk kuil U).
-        Pulau pulauKanan = new Pulau(traverseKuil2);
-
-        // Membuat pulau kanan
-        while (traverseKuil2.getNext() != null) {
-            traverseKuil2 = traverseKuil2.getNext();
-            pulauKanan.bangun(traverseKuil2.getNamaKuil(), traverseKuil2.getTinggi());
-        }
-        return new Pulau[] { pulauKiri, pulauKanan };
+        return sb;
     }
 
     public int gerakKiri(int s) {
@@ -396,28 +406,43 @@ public class TP2 {
                 String pulauU = in.next();
                 String pulauV = in.next();
 
+                // Membuat nested LinkedList
+                Pulau current = seluruhKuil.get(pulauU);
+                while (current.getNextPulau() != null) {
+                    current = current.getNextPulau();
+                    // Tambahkan size dari kuil yang dependen
+                    current.setSize(current.size() + seluruhKuil.get(pulauV).size());
+                }
+                current.setNextPulau(seluruhKuil.get(pulauV));
+                seluruhKuil.get(pulauV).setPreviousPulau(current);
+
                 // Lakukan proses unifikasi
                 seluruhPulau.get(pulauU).unifikasi(seluruhPulau.get(pulauV));
 
-                // Hapus pulau yang kecil
-                seluruhPulau.remove(pulauV);
-
+                // Redirect ke pulau yang lebih besar biar bisa diambil kalo pas pisah.
+                seluruhPulau.put(pulauV, seluruhPulau.get(pulauU));
+                // printHM(seluruhPulau);
                 // Cetak berapa banyak dataran di pulau baru.
                 out.println(seluruhPulau.get(pulauU).size());
             } else if (cmd.equals("PISAH")) {
                 String kuilU = in.next();
-                Pulau[] pulauTerpisah = seluruhKuil.get(kuilU).pisah(kuilU);
 
-                // Timpa untuk kuil yang ada di sebelah kiri U.
-                seluruhKuil.put(pulauTerpisah[0].getFirst().getNamaKuil(), pulauTerpisah[0]);
-                seluruhPulau.put(pulauTerpisah[0].getFirst().getNamaKuil(), pulauTerpisah[0]);
+                // Memotong nested Linked List
+                seluruhKuil.get(kuilU).setPreviousPulau(null);
+                seluruhKuil.get(seluruhPulau.get(kuilU).getFirst().getNamaKuil()).setNextPulau(null);
 
-                // Timpa untuk kuil yang ada di sebelah kanan U.
-                seluruhKuil.put(kuilU, pulauTerpisah[1]);
-                seluruhPulau.put(kuilU, pulauTerpisah[1]);
+                StringBuilder sb = seluruhKuil.get(kuilU).pisah(seluruhPulau.get(kuilU));
+                seluruhPulau.put(kuilU, seluruhKuil.get(kuilU));
+
+                // Memindahkan reference pulau-pulau di kanan yang dipotong
+                Pulau current = seluruhKuil.get(kuilU);
+                while (current.getNextPulau() != null) {
+                    current = current.getNextPulau();
+                    seluruhPulau.put(current.getFirst().getNamaKuil(), seluruhPulau.get(kuilU));
+                }
 
                 // Cetak hasilnya
-                out.println(pulauTerpisah[0].size() + " " + pulauTerpisah[1].size());
+                out.println(sb);
             } else if (cmd.equals("GERAK")) {
                 String arah = in.next();
                 if (arah.equals("KIRI")) {
