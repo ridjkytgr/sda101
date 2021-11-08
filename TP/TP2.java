@@ -408,6 +408,8 @@ public class TP2 {
 
                 // Membuat nested LinkedList
                 Pulau current = seluruhKuil.get(pulauU);
+
+                // Jika sebelumnya sudah pernah melakukan unifikasi.
                 while (current.getNextPulau() != null) {
                     current = current.getNextPulau();
                     // Tambahkan size dari kuil yang dependen
@@ -421,24 +423,32 @@ public class TP2 {
 
                 // Redirect ke pulau yang lebih besar biar bisa diambil kalo pas pisah.
                 seluruhPulau.put(pulauV, seluruhPulau.get(pulauU));
-                // printHM(seluruhPulau);
+
                 // Cetak berapa banyak dataran di pulau baru.
                 out.println(seluruhPulau.get(pulauU).size());
             } else if (cmd.equals("PISAH")) {
                 String kuilU = in.next();
 
-                // Memotong nested Linked List
-                seluruhKuil.get(kuilU).setPreviousPulau(null);
-                seluruhKuil.get(seluruhPulau.get(kuilU).getFirst().getNamaKuil()).setNextPulau(null);
+                // Untuk mencari reference pulau paling kiri (paling besar)
+                Pulau current1 = seluruhKuil.get(kuilU);
+                while (current1.getPreviousPulau() != null) {
+                    current1 = current1.getPreviousPulau();
+                }
 
-                StringBuilder sb = seluruhKuil.get(kuilU).pisah(seluruhPulau.get(kuilU));
+                // Memotong nested Linked List
+                Pulau previousKuil = seluruhKuil.get(kuilU).getPreviousPulau();
+                seluruhKuil.get(kuilU).setPreviousPulau(null);
+                seluruhKuil.get(previousKuil.getFirst().getNamaKuil()).setNextPulau(null);
+
+                StringBuilder sb = seluruhKuil.get(kuilU).pisah(current1);
                 seluruhPulau.put(kuilU, seluruhKuil.get(kuilU));
 
                 // Memindahkan reference pulau-pulau di kanan yang dipotong
-                Pulau current = seluruhKuil.get(kuilU);
-                while (current.getNextPulau() != null) {
-                    current = current.getNextPulau();
-                    seluruhPulau.put(current.getFirst().getNamaKuil(), seluruhPulau.get(kuilU));
+                Pulau current2 = seluruhKuil.get(kuilU);
+
+                while (current2.getNextPulau() != null) {
+                    current2 = current2.getNextPulau();
+                    seluruhPulau.put(current2.getFirst().getNamaKuil(), seluruhPulau.get(kuilU));
                 }
 
                 // Cetak hasilnya
