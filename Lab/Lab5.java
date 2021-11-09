@@ -48,13 +48,34 @@ public class Lab5 {
         out.flush();
     }
 
-    // TODO
     static String handleBeli(int L, int R) {
+        Node min = avlTree.minBeli(avlTree.root, L);
+        Node max = avlTree.maxBeli(avlTree.root, R);
 
-        return "-1 -1";
+        if (min.equals(max)) { // Jika duplikat
+            if (min.count > 1 || max.count > 1) {
+                // Min yang masuk ke dalam arrayList
+                int hargaMin = hm.get(min.duplikatNama.get(0));
+                int tipeMin = min.duplikatTipe.get(0);
+
+                // Ini dari representasi Node.
+                int tipeMax = max.tipe;
+                if (tipeMin != tipeMax) { // Kalo tipenya beda
+                    return hargaMin + " " + Integer.toString(max.harga);
+                }
+                // Kalo ternyata tipenya sama.
+                return "-1 -1";
+
+            }
+            return "-1 -1";
+        } else {
+            if (min.tipe == max.tipe) { // Jika tipenya sama
+                return "-1 -1";
+            }
+            return Integer.toString(min.harga) + " " + Integer.toString(max.harga);
+        }
     }
 
-    // TODO
     static void handleStock(String nama, int harga, int tipe) {
         avlTree.insertHelper(nama, harga, tipe);
         hm.put(nama, harga);
@@ -62,9 +83,9 @@ public class Lab5 {
         avlTree.preOrder(avlTree.root);
     }
 
-    // TODO
     static void handleSoldOut(String nama) {
         avlTree.deleteHelper(nama, hm);
+
         avlTree.preOrder(avlTree.root);
     }
 
@@ -289,10 +310,26 @@ class AVLTree {
             // count and return
             if (root.count > 1) {
                 (root.count)--;
-                for (int i = 0; i < root.duplikatNama.size(); i++) {
-                    if (nama.equals(root.duplikatNama.get(i))) {
-                        root.duplikatNama.remove(i);
-                        root.duplikatTipe.remove(i);
+                if (nama.equals(root.nama)) { // Jika yang dicari adalah Node yang mewakilkan.
+                    Node nodePengganti = new Node(root.duplikatNama.get(0), harga, root.duplikatTipe.get(0));
+                    // Hapus yang dijadikan pengganti
+                    root.duplikatNama.remove(0);
+                    root.duplikatTipe.remove(0);
+
+                    // Copy data-data yang menggantikan
+                    nodePengganti.left = root.left;
+                    nodePengganti.right = root.right;
+                    nodePengganti.height = root.height;
+                    nodePengganti.count = root.count;
+                    nodePengganti.duplikatNama = root.duplikatNama;
+                    nodePengganti.duplikatTipe = root.duplikatTipe;
+                    root = nodePengganti;
+                } else {
+                    for (int i = 0; i < root.duplikatNama.size(); i++) { // Jika yang dicari ada di dalam arraylist.
+                        if (nama.equals(root.duplikatNama.get(i))) {
+                            root.duplikatNama.remove(i);
+                            root.duplikatTipe.remove(i);
+                        }
                     }
                 }
                 return root;
@@ -362,12 +399,78 @@ class AVLTree {
         return root;
     }
 
+    Node minBeli(Node root, int hargaMin) {
+        Node minNode = root;
+        while (minNode != null) {
+            // System.out.println(minNode.harga);
+            // Nentuin belok ke mana yang paling pertama
+            if (minNode.harga > hargaMin) { // Belok ke kiri
+                if (minNode.left != null && minNode.left.harga > hargaMin) {
+                    minNode = minNode.left;
+                } else if (minNode.left != null && minNode.left.right != null && minNode.left.right.harga > hargaMin) {
+                    minNode = minNode.left.right;
+                } else if (minNode.left == null && minNode.right == null) {
+                    return minNode;
+                } else {
+                    return minNode;
+                }
+
+            } else if (minNode.harga <= hargaMin) { // Belok ke kanan
+                if (minNode.right != null && minNode.right.harga < hargaMin) {
+                    minNode = minNode.right;
+                } else if (minNode.right != null && minNode.right.left != null && minNode.right.left.harga < hargaMin) {
+                    minNode = minNode.right.left;
+                } else if (minNode.left == null && minNode.right == null) {
+                    return minNode;
+                } else {
+                    return minNode;
+                }
+            }
+        }
+        return minNode;
+    }
+
+    Node maxBeli(Node root, int hargaMax) {
+        Node maxNode = root;
+        while (maxNode != null) {
+            // Nentuin belok ke mana yang paling pertama
+            if (maxNode.harga > hargaMax) { // Belok ke kiri
+                if (maxNode.left != null && maxNode.left.harga > hargaMax) {
+                    maxNode = maxNode.left;
+                } else if (maxNode.left != null && maxNode.left.right != null && maxNode.left.right.harga > hargaMax) {
+                    maxNode = maxNode.left.right;
+                } else if (maxNode.left == null && maxNode.right == null) {
+                    return maxNode;
+                } else {
+                    return maxNode;
+                }
+
+            } else if (maxNode.harga <= hargaMax) { // Belok ke kanan
+                if (maxNode.right != null && maxNode.right.harga < hargaMax) {
+                    maxNode = maxNode.right;
+                } else if (maxNode.right != null && maxNode.right.left != null && maxNode.right.left.harga < hargaMax) {
+                    maxNode = maxNode.right.left;
+                } else if (maxNode.left == null && maxNode.right == null) {
+                    return maxNode;
+                } else {
+                    return maxNode;
+                }
+            }
+        }
+        return maxNode;
+    }
+
     void preOrder(Node root) {
         if (root != null) {
             System.out.println("------------------------------");
             System.out.println("INI HARGANYA: " + root.harga);
             System.out.println("INI NAMANYA: " + root.nama);
             System.out.println("INI TIPENYA: " + root.tipe);
+            String namaKiri = root.left != null ? root.left.nama : "KOSONG";
+            String namaKanan = root.right != null ? root.right.nama : "KOSONG";
+            System.out.println("INI PUNYA KIRI: " + namaKiri);
+            System.out.println("INI PUNYA KANAN: " + namaKanan);
+            System.out.println("------------------------------");
             if (root.duplikatNama.size() > 0) {
                 System.out.println("------------------------------");
                 System.out.println("DUPLIKAT");
