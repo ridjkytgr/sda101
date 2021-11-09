@@ -51,15 +51,12 @@ public class Lab5 {
     // TODO
     static String handleBeli(int L, int R) {
 
-        return "";
+        return "-1 -1";
     }
 
     // TODO
     static void handleStock(String nama, int harga, int tipe) {
-        Node insert = avlTree.insert(new Node(nama, harga, tipe), nama, harga, tipe);
-        avlTree.insertHelper(insert);
 
-        out.println(avlTree.preOrder(avlTree.root));
     }
 
     // TODO
@@ -95,166 +92,246 @@ public class Lab5 {
 
 }
 
+// An AVL tree node
 class Node {
-    String nama;
-    int harga;
-    int tipe;
-    int height;
+    int key;
     Node left;
     Node right;
-    boolean flagVisited;
-
-    // Untuk yang harga duplikat.
-    ArrayList<Node> duplicates;
-
-    public Node(String nama, int harga, int tipe) {
-        this.nama = nama;
-        this.harga = harga;
-        this.tipe = tipe;
-        this.duplicates = new ArrayList<Node>();
-        this.flagVisited = false;
-    }
-
+    int height;
+    int count;
 }
 
 class AVLTree {
-    public Node root;
-
-    public AVLTree() {
-        this.root = null;
+    // A utility function to get height of the tree
+    static int height(Node N) {
+        if (N == null)
+            return 0;
+        return N.height;
     }
 
-    public void updateHeight(Node n) {
-        n.height = 1 + Math.max(height(n.left), height(n.right));
+    // A utility function to get maximum of two integers
+    static int max(int a, int b) {
+        return (a > b) ? a : b;
     }
 
-    public int height(Node n) {
-        return n == null ? -1 : n.height;
-    }
-
-    public int getBalance(Node n) {
-        return (n == null) ? 0 : height(n.right) - height(n.left);
-    }
-
-    /**
-     * Method untuk melakukan RR-rotation
-     * 
-     * @param y root dari AVLTree yang akan dilakukan rotation
-     * @return Root yang baru setelah dilakukan rotasi
+    /*
+     * Helper function that allocates a new Node with the given key and null left
+     * and right pointers.
      */
-    public Node rotateLeft(Node y) {
-        Node x = y.right;
-        Node z = x.left;
-        x.left = y;
-        y.right = z;
-        updateHeight(y);
-        updateHeight(x);
-        return x;
+    static Node newNode(int key) {
+        Node node = new Node();
+        node.key = key;
+        node.left = null;
+        node.right = null;
+        node.height = 1; // new node is initially added at leaf
+        node.count = 1;
+        return (node);
     }
 
-    /**
-     * Method untuk melakukan LL-rotation
-     * 
-     * @param y root dari AVLTree yang akan dilakukan rotation
-     * @return Root yang baru setelah dilakukan rotasi
-     */
-    public Node rotateRight(Node y) {
+    // A utility function to right rotate subtree rooted with y
+    // See the diagram given above.
+    static Node rightRotate(Node y) {
         Node x = y.left;
-        Node z = x.right;
+        Node T2 = x.right;
+
+        // Perform rotation
         x.right = y;
-        y.left = z;
-        updateHeight(y);
-        updateHeight(x);
+        y.left = T2;
+
+        // Update heights
+        y.height = max(height(y.left), height(y.right)) + 1;
+        x.height = max(height(x.left), height(x.right)) + 1;
+
+        // Return new root
         return x;
     }
 
-    /**
-     * Proses rebalance setiap menambahkan ataupun mengurangi Node
-     * (Insertion/Deletion).
-     * 
-     * @param z root yang akan dilakukan rebalancing
-     * @return root baru setelah dilakuakn rebalancing
+    // A utility function to left rotate subtree rooted with x
+    // See the diagram given above.
+    static Node leftRotate(Node x) {
+        Node y = x.right;
+        Node T2 = y.left;
+
+        // Perform rotation
+        y.left = x;
+        x.right = T2;
+
+        // Update heights
+        x.height = max(height(x.left), height(x.right)) + 1;
+        y.height = max(height(y.left), height(y.right)) + 1;
+
+        // Return new root
+        return y;
+    }
+
+    // Get Balance factor of Node N
+    static int getBalance(Node N) {
+        if (N == null)
+            return 0;
+        return height(N.left) - height(N.right);
+    }
+
+    static Node insert(Node node, int key) {
+        /* 1. Perform the normal BST rotation */
+        if (node == null)
+            return (newNode(key));
+
+        // If key already exists in BST, increment count and return
+        if (key == node.key) {
+            (node.count)++;
+            return node;
+        }
+
+        /* Otherwise, recur down the tree */
+        if (key < node.key)
+            node.left = insert(node.left, key);
+        else
+            node.right = insert(node.right, key);
+
+        /* 2. Update height of this ancestor node */
+        node.height = max(height(node.left), height(node.right)) + 1;
+
+        /*
+         * 3. Get the balance factor of this ancestor node to check whether this node
+         * became unbalanced
+         */
+        int balance = getBalance(node);
+
+        // If this node becomes unbalanced, then there are 4 cases
+
+        // Left Left Case
+        if (balance > 1 && key < node.left.key)
+            return rightRotate(node);
+
+        // Right Right Case
+        if (balance < -1 && key > node.right.key)
+            return leftRotate(node);
+
+        // Left Right Case
+        if (balance > 1 && key > node.left.key) {
+            node.left = leftRotate(node.left);
+            return rightRotate(node);
+        }
+
+        // Right Left Case
+        if (balance < -1 && key < node.right.key) {
+            node.right = rightRotate(node.right);
+            return leftRotate(node);
+        }
+
+        /* return the (unchanged) node pointer */
+        return node;
+    }
+
+    /*
+     * Given a non-empty binary search tree, return the node with minimum key value
+     * found in that tree. Note that the entire tree does not need to be searched.
      */
-    public Node rebalance(Node z) {
-        updateHeight(z);
-        int balance = getBalance(z);
-        if (balance > 1) {
-            if (height(z.right.right) > height(z.right.left)) {
-                z = rotateLeft(z);
+    static Node minValueNode(Node node) {
+        Node current = node;
+
+        /* loop down to find the leftmost leaf */
+        while (current.left != null)
+            current = current.left;
+
+        return current;
+    }
+
+    static Node deleteNode(Node root, int key) {
+        // STEP 1: PERFORM STANDARD BST DELETE
+
+        if (root == null)
+            return root;
+
+        // If the key to be deleted is smaller than the root's key,
+        // then it lies in left subtree
+        if (key < root.key)
+            root.left = deleteNode(root.left, key);
+
+        // If the key to be deleted is greater than the root's key,
+        // then it lies in right subtree
+        else if (key > root.key)
+            root.right = deleteNode(root.right, key);
+
+        // if key is same as root's key, then This is the node
+        // to be deleted
+        else {
+            // If key is present more than once, simply decrement
+            // count and return
+            if (root.count > 1) {
+                (root.count)--;
+                return null;
+            }
+            // ElSE, delete the node
+
+            // node with only one child or no child
+            if ((root.left == null) || (root.right == null)) {
+                Node temp = root.left != null ? root.left : root.right;
+
+                // No child case
+                if (temp == null) {
+                    temp = root;
+                    root = null;
+                } else // One child case
+                    root = temp; // Copy the contents of the non-empty child
             } else {
-                z.right = rotateRight(z.right);
-                z = rotateLeft(z);
-            }
-        } else if (balance < -1) {
-            if (height(z.left.left) > height(z.left.right))
-                z = rotateRight(z);
-            else {
-                z.left = rotateLeft(z.left);
-                z = rotateRight(z);
+                // node with two children: Get the inorder successor (smallest
+                // in the right subtree)
+                Node temp = minValueNode(root.right);
+
+                // Copy the inorder successor's data to this node and update the count
+                root.key = temp.key;
+                root.count = temp.count;
+                temp.count = 1;
+
+                // Delete the inorder successor
+                root.right = deleteNode(root.right, temp.key);
             }
         }
-        return z;
-    }
 
-    public void insertHelper(Node node) {
-        this.root = node;
-    }
+        // If the tree had only one node then return
+        if (root == null)
+            return root;
 
-    public Node insert(Node node, String nama, int harga, int tipe) {
-        if (node == null) {
-            return new Node(nama, harga, tipe);
-        } else if (node.harga > harga) {
-            node.left = insert(node.left, nama, harga, tipe);
-        } else if (node.harga < harga) {
-            node.right = insert(node.right, nama, harga, tipe);
-        } else if (node.harga == harga && node.flagVisited == true) { // Jika ada node yang kembar
-            node.duplicates.add(new Node(nama, harga, tipe));
-        } else if (node.harga == harga && node.flagVisited == false) {
-            node.flagVisited = true;
+        // STEP 2: UPDATE HEIGHT OF THE CURRENT NODE
+        root.height = max(height(root.left), height(root.right)) + 1;
+
+        // STEP 3: GET THE BALANCE FACTOR OF THIS NODE (to check whether
+        // this node became unbalanced)
+        int balance = getBalance(root);
+
+        // If this node becomes unbalanced, then there are 4 cases
+
+        // Left Left Case
+        if (balance > 1 && getBalance(root.left) >= 0)
+            return rightRotate(root);
+
+        // Left Right Case
+        if (balance > 1 && getBalance(root.left) < 0) {
+            root.left = leftRotate(root.left);
+            return rightRotate(root);
         }
-        return rebalance(node);
+
+        // Right Right Case
+        if (balance < -1 && getBalance(root.right) <= 0)
+            return leftRotate(root);
+
+        // Right Left Case
+        if (balance < -1 && getBalance(root.right) > 0) {
+            root.right = rightRotate(root.right);
+            return leftRotate(root);
+        }
+
+        return root;
     }
 
-    public StringBuilder preOrder(Node root) {
-        StringBuilder sb = new StringBuilder();
+    // A utility function to print preorder traversal of the tree.
+    // The function also prints height of every node
+    static void preOrder(Node root) {
         if (root != null) {
-            String harga = "(" + root.harga + ")";
-            sb.append(root.nama);
-            sb.append(harga);
-            sb.append(" ");
-            if (root.duplicates.size() > 0) { // Jika ada duplikat
-                for (int i = 0; i < root.duplicates.size(); i++) {
-                    harga = "(" + root.duplicates.get(i).harga + ")";
-                    sb.append(root.duplicates.get(i).nama);
-                    sb.append(harga);
-                    sb.append(" ");
-                }
-            }
+            System.out.printf("%d(%d) ", root.key, root.count);
             preOrder(root.left);
             preOrder(root.right);
         }
-        return sb;
     }
-
-    // public Node delete(Node node, int harga) {
-    // if (node == null) {
-    // return node;
-    // } else if (node.harga > harga) {
-    // node.left = delete(node.left, harga);
-    // } else if (node.harga < harga) {
-    // node.right = delete(node.right, harga);
-    // } else {
-    // if (node.left == null || node.right == null) {
-    // node = (node.left == null) ? node.right : node.left;
-    // } else {
-    // Node mostLeftChild = mostLeftChild(node.right);
-    // node.harga = mostLeftChild.harga;
-    // node.right = delete(node.right, node.harga);
-    // }
-    // }
-    // if (node != null) {
-    // node = rebalance(node);
-    // }
-    // return node;
-    // }
 }
