@@ -52,6 +52,14 @@ public class Lab5 {
         Node min = avlTree.ceil(avlTree.root, L);
         Node max = avlTree.floor(avlTree.root, R);
 
+        if (min == null || max == null) {
+            return "-1 -1";
+        }
+
+        if (max.harga < min.harga) {
+            return "-1 -1";
+        }
+
         if (min.equals(max)) { // Jika duplikat (node yang sama)
             if (min.count > 1 || max.count > 1) {
                 for (int i = 0; i < min.duplikatNama.size(); i++) {
@@ -415,71 +423,6 @@ class AVLTree {
 
         return root;
     }
-
-    // Node minBeli(Node root, int hargaMin) {
-    // Node minNode = root;
-    // while (minNode != null) {
-    // // System.out.println(minNode.harga);
-    // // Nentuin belok ke mana yang paling pertama
-    // if (minNode.harga > hargaMin) { // Belok ke kiri
-    // if (minNode.left != null && minNode.left.harga > hargaMin) {
-    // minNode = minNode.left;
-    // } else if (minNode.left != null && minNode.left.right != null &&
-    // minNode.left.right.harga > hargaMin) {
-    // minNode = minNode.left.right;
-    // } else if (minNode.left == null && minNode.right == null) {
-    // return minNode;
-    // } else {
-    // return minNode;
-    // }
-
-    // } else if (minNode.harga <= hargaMin) { // Belok ke kanan
-    // if (minNode.right != null && minNode.right.harga < hargaMin) {
-    // minNode = minNode.right;
-    // } else if (minNode.right != null && minNode.right.left != null &&
-    // minNode.right.left.harga < hargaMin) {
-    // minNode = minNode.right.left;
-    // } else if (minNode.left == null && minNode.right == null) {
-    // return minNode;
-    // } else {
-    // return minNode;
-    // }
-    // }
-    // }
-    // return minNode;
-    // }
-
-    // Node maxBeli(Node root, int hargaMax) {
-    // Node maxNode = root;
-    // while (maxNode != null) {
-    // // Nentuin belok ke mana yang paling pertama
-    // if (maxNode.harga > hargaMax) { // Belok ke kiri
-    // if (maxNode.left != null && maxNode.left.harga > hargaMax) {
-    // maxNode = maxNode.left;
-    // } else if (maxNode.left != null && maxNode.left.right != null &&
-    // maxNode.left.right.harga > hargaMax) {
-    // maxNode = maxNode.left.right;
-    // } else if (maxNode.left == null && maxNode.right == null) {
-    // return maxNode;
-    // } else {
-    // return maxNode;
-    // }
-
-    // } else if (maxNode.harga <= hargaMax) { // Belok ke kanan
-    // if (maxNode.right != null && maxNode.right.harga < hargaMax) {
-    // maxNode = maxNode.right;
-    // } else if (maxNode.right != null && maxNode.right.left != null &&
-    // maxNode.right.left.harga < hargaMax) {
-    // maxNode = maxNode.right.left;
-    // } else if (maxNode.left == null && maxNode.right == null) {
-    // return maxNode;
-    // } else {
-    // return maxNode;
-    // }
-    // }
-    // }
-    // return maxNode;
-    // }
 
     // Referensi: https://www.geeksforgeeks.org/floor-and-ceil-from-a-bst/
     Node floor(Node root, int hargaMax) {
