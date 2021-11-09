@@ -263,10 +263,10 @@ class AVLTree {
     }
 
     void deleteHelper(String nama, Map<String, Integer> hm) {
-        root = deleteNode(root, hm.get(nama));
+        root = deleteNode(root, hm.get(nama), nama);
     }
 
-    Node deleteNode(Node root, int harga) {
+    Node deleteNode(Node root, int harga, String nama) {
         // STEP 1: PERFORM STANDARD BST DELETE
 
         if (root == null)
@@ -275,12 +275,12 @@ class AVLTree {
         // If the key to be deleted is smaller than the root's key,
         // then it lies in left subtree
         if (harga < root.harga)
-            root.left = deleteNode(root.left, harga);
+            root.left = deleteNode(root.left, harga, nama);
 
         // If the key to be deleted is greater than the root's key,
         // then it lies in right subtree
         else if (harga > root.harga)
-            root.right = deleteNode(root.right, harga);
+            root.right = deleteNode(root.right, harga, nama);
 
         // if key is same as root's key, then This is the node
         // to be deleted
@@ -290,12 +290,12 @@ class AVLTree {
             if (root.count > 1) {
                 (root.count)--;
                 for (int i = 0; i < root.duplikatNama.size(); i++) {
-                    if (root.nama.equals(root.duplikatNama.get(i))) {
+                    if (nama.equals(root.duplikatNama.get(i))) {
                         root.duplikatNama.remove(i);
                         root.duplikatTipe.remove(i);
                     }
                 }
-                return null;
+                return root;
             }
             // ElSE, delete the node
 
@@ -322,7 +322,7 @@ class AVLTree {
                 temp.count = 1;
 
                 // Delete the inorder successor
-                root.right = deleteNode(root.right, temp.harga);
+                root.right = deleteNode(root.right, temp.harga, temp.nama);
             }
         }
 
@@ -367,6 +367,17 @@ class AVLTree {
             System.out.println("------------------------------");
             System.out.println("INI HARGANYA: " + root.harga);
             System.out.println("INI NAMANYA: " + root.nama);
+            System.out.println("INI TIPENYA: " + root.tipe);
+            if (root.duplikatNama.size() > 0) {
+                System.out.println("------------------------------");
+                System.out.println("DUPLIKAT");
+                for (int i = 0; i < root.duplikatNama.size(); i++) {
+                    System.out.println("INI HARGANYA: " + root.harga);
+                    System.out.println("INI NAMANYA: " + root.duplikatNama.get(i));
+                    System.out.println("INI TIPENYA: " + root.duplikatTipe.get(i));
+                }
+            }
+
             preOrder(root.left);
             preOrder(root.right);
         }
