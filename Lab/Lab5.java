@@ -64,7 +64,8 @@ public class Lab5 {
 
     // TODO
     static void handleSoldOut(String nama) {
-
+        avlTree.deleteHelper(nama, hm);
+        avlTree.preOrder(avlTree.root);
     }
 
     // taken from https://codeforces.com/submissions/Petr
@@ -104,7 +105,8 @@ class Node {
     Node right;
     int height;
     int count;
-    ArrayList<Node> duplikat = new ArrayList<Node>();
+    ArrayList<String> duplikatNama = new ArrayList<String>();
+    ArrayList<Integer> duplikatTipe = new ArrayList<Integer>();
 
     public Node(String nama, int harga, int tipe) {
         this.nama = nama;
@@ -200,6 +202,8 @@ class AVLTree {
         // If key already exists in BST, increment count and return
         if (harga == node.harga) {
             (node.count)++;
+            node.duplikatNama.add(nama);
+            node.duplikatTipe.add(tipe);
             return node;
         }
 
@@ -258,116 +262,105 @@ class AVLTree {
         return current;
     }
 
-    // Node deleteNode(Node root, int key) {
-    // // STEP 1: PERFORM STANDARD BST DELETE
+    void deleteHelper(String nama, Map<String, Integer> hm) {
+        root = deleteNode(root, hm.get(nama));
+    }
 
-    // if (root == null)
-    // return root;
+    Node deleteNode(Node root, int harga) {
+        // STEP 1: PERFORM STANDARD BST DELETE
 
-    // // If the key to be deleted is smaller than the root's key,
-    // // then it lies in left subtree
-    // if (key < root.key)
-    // root.left = deleteNode(root.left, key);
+        if (root == null)
+            return root;
 
-    // // If the key to be deleted is greater than the root's key,
-    // // then it lies in right subtree
-    // else if (key > root.key)
-    // root.right = deleteNode(root.right, key);
+        // If the key to be deleted is smaller than the root's key,
+        // then it lies in left subtree
+        if (harga < root.harga)
+            root.left = deleteNode(root.left, harga);
 
-    // // if key is same as root's key, then This is the node
-    // // to be deleted
-    // else {
-    // // If key is present more than once, simply decrement
-    // // count and return
-    // if (root.count > 1) {
-    // (root.count)--;
-    // return null;
-    // }
-    // // ElSE, delete the node
+        // If the key to be deleted is greater than the root's key,
+        // then it lies in right subtree
+        else if (harga > root.harga)
+            root.right = deleteNode(root.right, harga);
 
-    // // node with only one child or no child
-    // if ((root.left == null) || (root.right == null)) {
-    // Node temp = root.left != null ? root.left : root.right;
+        // if key is same as root's key, then This is the node
+        // to be deleted
+        else {
+            // If key is present more than once, simply decrement
+            // count and return
+            if (root.count > 1) {
+                (root.count)--;
+                for (int i = 0; i < root.duplikatNama.size(); i++) {
+                    if (root.nama.equals(root.duplikatNama.get(i))) {
+                        root.duplikatNama.remove(i);
+                        root.duplikatTipe.remove(i);
+                    }
+                }
+                return null;
+            }
+            // ElSE, delete the node
 
-    // // No child case
-    // if (temp == null) {
-    // temp = root;
-    // root = null;
-    // } else // One child case
-    // root = temp; // Copy the contents of the non-empty child
-    // } else {
-    // // node with two children: Get the inorder successor (smallest
-    // // in the right subtree)
-    // Node temp = minValueNode(root.right);
+            // node with only one child or no child
+            if ((root.left == null) || (root.right == null)) {
+                Node temp = root.left != null ? root.left : root.right;
 
-    // // Copy the inorder successor's data to this node and update the count
-    // root.key = temp.key;
-    // root.count = temp.count;
-    // temp.count = 1;
+                // No child case
+                if (temp == null) {
+                    temp = root;
+                    root = null;
+                } else // One child case
+                    root = temp; // Copy the contents of the non-empty child
+            } else {
+                // node with two children: Get the inorder successor (smallest
+                // in the right subtree)
+                Node temp = minValueNode(root.right);
 
-    // // Delete the inorder successor
-    // root.right = deleteNode(root.right, temp.key);
-    // }
-    // }
+                // Copy the inorder successor's data to this node and update the count
+                root.harga = temp.harga;
+                root.nama = temp.nama;
+                root.tipe = temp.tipe;
+                root.count = temp.count;
+                temp.count = 1;
 
-    // // If the tree had only one node then return
-    // if (root == null)
-    // return root;
+                // Delete the inorder successor
+                root.right = deleteNode(root.right, temp.harga);
+            }
+        }
 
-    // // STEP 2: UPDATE HEIGHT OF THE CURRENT NODE
-    // root.height = max(height(root.left), height(root.right)) + 1;
+        // If the tree had only one node then return
+        if (root == null)
+            return root;
 
-    // // STEP 3: GET THE BALANCE FACTOR OF THIS NODE (to check whether
-    // // this node became unbalanced)
-    // int balance = getBalance(root);
+        // STEP 2: UPDATE HEIGHT OF THE CURRENT NODE
+        root.height = max(height(root.left), height(root.right)) + 1;
 
-    // // If this node becomes unbalanced, then there are 4 cases
+        // STEP 3: GET THE BALANCE FACTOR OF THIS NODE (to check whether
+        // this node became unbalanced)
+        int balance = getBalance(root);
 
-    // // Left Left Case
-    // if (balance > 1 && getBalance(root.left) >= 0)
-    // return rightRotate(root);
+        // If this node becomes unbalanced, then there are 4 cases
 
-    // // Left Right Case
-    // if (balance > 1 && getBalance(root.left) < 0) {
-    // root.left = leftRotate(root.left);
-    // return rightRotate(root);
-    // }
+        // Left Left Case
+        if (balance > 1 && getBalance(root.left) >= 0)
+            return rightRotate(root);
 
-    // // Right Right Case
-    // if (balance < -1 && getBalance(root.right) <= 0)
-    // return leftRotate(root);
+        // Left Right Case
+        if (balance > 1 && getBalance(root.left) < 0) {
+            root.left = leftRotate(root.left);
+            return rightRotate(root);
+        }
 
-    // // Right Left Case
-    // if (balance < -1 && getBalance(root.right) > 0) {
-    // root.right = rightRotate(root.right);
-    // return leftRotate(root);
-    // }
+        // Right Right Case
+        if (balance < -1 && getBalance(root.right) <= 0)
+            return leftRotate(root);
 
-    // return root;
-    // }
+        // Right Left Case
+        if (balance < -1 && getBalance(root.right) > 0) {
+            root.right = rightRotate(root.right);
+            return leftRotate(root);
+        }
 
-    // A utility function to print preorder traversal of the tree.
-    // The function also prints height of every node
-    // public StringBuilder preOrder(Node root) {
-    // StringBuilder sb = new StringBuilder();
-    // if (root != null) {
-    // String harga = "(" + root.harga + ")";
-    // sb.append(root.nama);
-    // sb.append(harga);
-    // sb.append(" ");
-    // // if (root.duplicates.size() > 0) { // Jika ada duplikat
-    // // for (int i = 0; i < root.duplicates.size(); i++) {
-    // // harga = "(" + root.duplicates.get(i).harga + ")";
-    // // sb.append(root.duplicates.get(i).nama);
-    // // sb.append(harga);
-    // // sb.append(" ");
-    // // }
-    // // }
-    // preOrder(root.left);
-    // preOrder(root.right);
-    // }
-    // return sb;
-    // }
+        return root;
+    }
 
     void preOrder(Node root) {
         if (root != null) {
