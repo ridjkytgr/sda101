@@ -49,8 +49,8 @@ public class Lab5 {
     }
 
     static String handleBeli(int L, int R) {
-        Node min = avlTree.minBeli(avlTree.root, L);
-        Node max = avlTree.maxBeli(avlTree.root, R);
+        Node min = avlTree.ceil(avlTree.root, L);
+        Node max = avlTree.floor(avlTree.root, R);
 
         if (min.equals(max)) { // Jika duplikat (node yang sama)
             if (min.count > 1 || max.count > 1) {
@@ -416,65 +416,116 @@ class AVLTree {
         return root;
     }
 
-    Node minBeli(Node root, int hargaMin) {
-        Node minNode = root;
-        while (minNode != null) {
-            // System.out.println(minNode.harga);
-            // Nentuin belok ke mana yang paling pertama
-            if (minNode.harga > hargaMin) { // Belok ke kiri
-                if (minNode.left != null && minNode.left.harga > hargaMin) {
-                    minNode = minNode.left;
-                } else if (minNode.left != null && minNode.left.right != null && minNode.left.right.harga > hargaMin) {
-                    minNode = minNode.left.right;
-                } else if (minNode.left == null && minNode.right == null) {
-                    return minNode;
-                } else {
-                    return minNode;
-                }
+    // Node minBeli(Node root, int hargaMin) {
+    // Node minNode = root;
+    // while (minNode != null) {
+    // // System.out.println(minNode.harga);
+    // // Nentuin belok ke mana yang paling pertama
+    // if (minNode.harga > hargaMin) { // Belok ke kiri
+    // if (minNode.left != null && minNode.left.harga > hargaMin) {
+    // minNode = minNode.left;
+    // } else if (minNode.left != null && minNode.left.right != null &&
+    // minNode.left.right.harga > hargaMin) {
+    // minNode = minNode.left.right;
+    // } else if (minNode.left == null && minNode.right == null) {
+    // return minNode;
+    // } else {
+    // return minNode;
+    // }
 
-            } else if (minNode.harga <= hargaMin) { // Belok ke kanan
-                if (minNode.right != null && minNode.right.harga < hargaMin) {
-                    minNode = minNode.right;
-                } else if (minNode.right != null && minNode.right.left != null && minNode.right.left.harga < hargaMin) {
-                    minNode = minNode.right.left;
-                } else if (minNode.left == null && minNode.right == null) {
-                    return minNode;
-                } else {
-                    return minNode;
-                }
-            }
-        }
-        return minNode;
+    // } else if (minNode.harga <= hargaMin) { // Belok ke kanan
+    // if (minNode.right != null && minNode.right.harga < hargaMin) {
+    // minNode = minNode.right;
+    // } else if (minNode.right != null && minNode.right.left != null &&
+    // minNode.right.left.harga < hargaMin) {
+    // minNode = minNode.right.left;
+    // } else if (minNode.left == null && minNode.right == null) {
+    // return minNode;
+    // } else {
+    // return minNode;
+    // }
+    // }
+    // }
+    // return minNode;
+    // }
+
+    // Node maxBeli(Node root, int hargaMax) {
+    // Node maxNode = root;
+    // while (maxNode != null) {
+    // // Nentuin belok ke mana yang paling pertama
+    // if (maxNode.harga > hargaMax) { // Belok ke kiri
+    // if (maxNode.left != null && maxNode.left.harga > hargaMax) {
+    // maxNode = maxNode.left;
+    // } else if (maxNode.left != null && maxNode.left.right != null &&
+    // maxNode.left.right.harga > hargaMax) {
+    // maxNode = maxNode.left.right;
+    // } else if (maxNode.left == null && maxNode.right == null) {
+    // return maxNode;
+    // } else {
+    // return maxNode;
+    // }
+
+    // } else if (maxNode.harga <= hargaMax) { // Belok ke kanan
+    // if (maxNode.right != null && maxNode.right.harga < hargaMax) {
+    // maxNode = maxNode.right;
+    // } else if (maxNode.right != null && maxNode.right.left != null &&
+    // maxNode.right.left.harga < hargaMax) {
+    // maxNode = maxNode.right.left;
+    // } else if (maxNode.left == null && maxNode.right == null) {
+    // return maxNode;
+    // } else {
+    // return maxNode;
+    // }
+    // }
+    // }
+    // return maxNode;
+    // }
+
+    // Referensi: https://www.geeksforgeeks.org/floor-and-ceil-from-a-bst/
+    Node floor(Node root, int hargaMax) {
+        if (root == null)
+            return null;
+
+        /* If root->data is equal to key */
+        if (root.harga == hargaMax)
+            return root;
+
+        /* If root->data is greater than the key */
+        if (root.harga > hargaMax)
+            return floor(root.left, hargaMax);
+
+        /*
+         * Else, the floor may lie in right subtree or may be equal to the root
+         */
+        Node floorValue = floor(root.right, hargaMax);
+        int hargaDidapatkan = floorValue != null ? floorValue.harga : Integer.MAX_VALUE;
+        return (hargaDidapatkan <= hargaMax) ? floorValue : root;
     }
 
-    Node maxBeli(Node root, int hargaMax) {
-        Node maxNode = root;
-        while (maxNode != null) {
-            // Nentuin belok ke mana yang paling pertama
-            if (maxNode.harga > hargaMax) { // Belok ke kiri
-                if (maxNode.left != null && maxNode.left.harga > hargaMax) {
-                    maxNode = maxNode.left;
-                } else if (maxNode.left != null && maxNode.left.right != null && maxNode.left.right.harga > hargaMax) {
-                    maxNode = maxNode.left.right;
-                } else if (maxNode.left == null && maxNode.right == null) {
-                    return maxNode;
-                } else {
-                    return maxNode;
-                }
+    // Referensi: https://www.geeksforgeeks.org/floor-and-ceil-from-a-bst/
+    Node ceil(Node root, int hargaMin) {
 
-            } else if (maxNode.harga <= hargaMax) { // Belok ke kanan
-                if (maxNode.right != null && maxNode.right.harga < hargaMax) {
-                    maxNode = maxNode.right;
-                } else if (maxNode.right != null && maxNode.right.left != null && maxNode.right.left.harga < hargaMax) {
-                    maxNode = maxNode.right.left;
-                } else if (maxNode.left == null && maxNode.right == null) {
-                    return maxNode;
-                } else {
-                    return maxNode;
-                }
-            }
+        // Base case
+        if (root == null) {
+            return null;
         }
-        return maxNode;
+
+        // We found equal key
+        if (root.harga == hargaMin) {
+            return root;
+        }
+
+        // If root's key is smaller,
+        // ceil must be in right subtree
+        if (root.harga < hargaMin) {
+            return ceil(root.right, hargaMin);
+        }
+
+        // Else, either left subtree or root
+        // has the ceil value
+        Node ceil = ceil(root.left, hargaMin);
+        int hargaDidapatkan = ceil != null ? ceil.harga : Integer.MIN_VALUE;
+        return (hargaDidapatkan >= hargaMin) ? ceil : root;
     }
 
     void preOrder(Node root) {
