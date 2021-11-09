@@ -60,6 +60,20 @@ public class Lab5 {
             return "-1 -1";
         }
 
+        if (min.harga < L && max.harga > R) {
+            return "-1 -1";
+        }
+
+        // // Cari kombinasi-kombinasi min max yang paling besar
+        // if (min.harga == L || max.harga == R) {
+        // while (L <= R) {
+        // if (avlTree.ceil(avlTree.root, L + 1) != null && min.tipe == max.tipe)
+        // min = avlTree.ceil(avlTree.root, L + 1);
+        // L += 1;
+
+        // }
+        // }
+
         if (min.equals(max)) { // Jika duplikat (node yang sama)
             if (min.count > 1 || max.count > 1) {
                 for (int i = 0; i < min.duplikatNama.size(); i++) {
@@ -77,6 +91,7 @@ public class Lab5 {
             int tipeMax;
             int hargaMax;
 
+            // HARUSNYA KASIH DULU IF NYA BUAT MASTIIN KALO TIPENYA SAMA BARU CARI DUPLIKAT
             if (min.count > 1) { // Duplikat untuk min
                 for (int i = 0; i < min.duplikatNama.size(); i++) {
                     if (min.duplikatTipe.get(i) != max.tipe) { // Tipe beda
@@ -101,17 +116,19 @@ public class Lab5 {
                 return Integer.toString(min.harga) + " " + Integer.toString(max.harga);
             }
         }
-        return null;
+        return "";
     }
 
     static void handleStock(String nama, int harga, int tipe) {
         avlTree.insertHelper(nama, harga, tipe);
         hm.put(nama, harga);
-
+        // avlTree.preOrder(avlTree.root);
     }
 
     static void handleSoldOut(String nama) {
         avlTree.deleteHelper(nama, hm);
+        hm.remove(nama);
+        // avlTree.preOrder(avlTree.root);
     }
 
     // taken from https://codeforces.com/submissions/Petr
@@ -381,6 +398,8 @@ class AVLTree {
                 root.nama = temp.nama;
                 root.tipe = temp.tipe;
                 root.count = temp.count;
+                root.duplikatNama = temp.duplikatNama;
+                root.duplikatTipe = temp.duplikatTipe;
                 temp.count = 1;
 
                 // Delete the inorder successor
