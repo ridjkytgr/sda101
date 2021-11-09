@@ -52,41 +52,58 @@ public class Lab5 {
         Node min = avlTree.minBeli(avlTree.root, L);
         Node max = avlTree.maxBeli(avlTree.root, R);
 
-        if (min.equals(max)) { // Jika duplikat
+        if (min.equals(max)) { // Jika duplikat (node yang sama)
             if (min.count > 1 || max.count > 1) {
-                // Min yang masuk ke dalam arrayList
-                int hargaMin = hm.get(min.duplikatNama.get(0));
-                int tipeMin = min.duplikatTipe.get(0);
-
-                // Ini dari representasi Node.
-                int tipeMax = max.tipe;
-                if (tipeMin != tipeMax) { // Kalo tipenya beda
-                    return hargaMin + " " + Integer.toString(max.harga);
+                for (int i = 0; i < min.duplikatNama.size(); i++) {
+                    if (max.tipe != min.duplikatTipe.get(i)) { // Kalau tipe berbeda.
+                        int hargaMin = hm.get(min.duplikatNama.get(i));
+                        return Integer.toString(hargaMin) + " " + Integer.toString(max.harga);
+                    }
                 }
-                // Kalo ternyata tipenya sama.
-                return "-1 -1";
-
             }
+            // Kalo ga ada duplikat (berarti emang sama persis)
             return "-1 -1";
-        } else {
-            if (min.tipe == max.tipe) { // Jika tipenya sama
-                return "-1 -1";
+        } else { // Kalo ambil node yang beda.
+            int hargaMin;
+            int tipeMin;
+            int tipeMax;
+            int hargaMax;
+
+            if (min.count > 1) { // Duplikat untuk min
+                for (int i = 0; i < min.duplikatNama.size(); i++) {
+                    if (min.duplikatTipe.get(i) != max.tipe) { // Tipe beda
+                        hargaMin = hm.get(min.duplikatNama.get(i));
+                        tipeMin = min.duplikatTipe.get(i);
+                        return Integer.toString(hargaMin) + " " + Integer.toString(max.harga);
+                    }
+                }
+            } else if (max.count > 1) { // Duplikat untuk max
+                for (int i = 0; i < max.duplikatNama.size(); i++) {
+                    if (max.duplikatTipe.get(i) != max.tipe) { // Tipe beda
+                        hargaMax = hm.get(max.duplikatNama.get(i));
+                        tipeMax = max.duplikatTipe.get(i);
+                        return Integer.toString(min.harga) + " " + Integer.toString(hargaMax);
+                    }
+                }
+            } else { // Untuk non duplikat
+                if (min.tipe == max.tipe) { // Jika tipenya sama
+                    return "-1 -1";
+                }
+
+                return Integer.toString(min.harga) + " " + Integer.toString(max.harga);
             }
-            return Integer.toString(min.harga) + " " + Integer.toString(max.harga);
         }
+        return null;
     }
 
     static void handleStock(String nama, int harga, int tipe) {
         avlTree.insertHelper(nama, harga, tipe);
         hm.put(nama, harga);
 
-        avlTree.preOrder(avlTree.root);
     }
 
     static void handleSoldOut(String nama) {
         avlTree.deleteHelper(nama, hm);
-
-        avlTree.preOrder(avlTree.root);
     }
 
     // taken from https://codeforces.com/submissions/Petr
