@@ -208,10 +208,18 @@ class Pulau {
         return sb;
     }
 
+    public void inisiasiRaiden(int s) {
+        if (s >= 2) {
+            for (int i = 0; i < s - 1; i++) {
+                this.raiden = this.raiden.getNext();
+            }
+        }
+    }
+
     public int gerakKiri(int s) {
         for (int step = 0; step < s; step++) {
             // Jika sudah berada di paling kiri.
-            if (this.raiden.equals(this.getFirst())) {
+            if (this.raiden.getPrevious() == null) {
                 break;
             }
 
@@ -223,7 +231,7 @@ class Pulau {
     public int gerakKanan(int s) {
         for (int step = 0; step < s; step++) {
             // Jika sudah berada di paling kanan.
-            if (this.raiden.equals(this.getLast())) {
+            if (this.raiden.getNext() == null) {
                 break;
             }
 
@@ -233,43 +241,72 @@ class Pulau {
     }
 
     public int teleportasi(String namaKuil) {
-        while (this.raiden.getNext() != null) {
-            if (this.raiden.getIsKuil() && this.raiden.getNamaKuil().equals(namaKuil)) {
-                break;
-            }
-
-            this.raiden = this.raiden.getNext();
-        }
+        this.raiden = this.getFirst();
 
         return this.raiden.getTinggi();
     }
 
     public int tebasKiri(int s) {
+        if (this.size() == 1 && s > 0) { // Jika tidak bergerak
+            return 0;
+        }
+
+        Dataran raidenSebelumnya = this.raiden;
+
         int tinggiSebelumnya = this.raiden.getTinggi();
 
-        while (s > 0 && !this.raiden.equals(this.first)) {
+        // Jika ke kiri tidak ada yg sama lagi.
+        Dataran temp = this.raiden;
+
+        while (s > 0 && this.raiden.getPrevious() != null) {
             this.raiden = this.raiden.getPrevious();
 
             if (this.raiden.getTinggi() == tinggiSebelumnya) {
+                temp = this.raiden;
                 s--;
             }
         }
 
-        return this.raiden.getNext().getTinggi();
+        // Pindahkan pointer raiden.
+        this.raiden = temp;
+
+        if (raidenSebelumnya.equals(temp)) { // Jika tidak berpindah tempat
+            return 0;
+        }
+
+        return temp.getNext().getTinggi();
+
     }
 
     public int tebasKanan(int s) {
+        if (this.size() == 1 && s > 0) { // Jika tidak bergerak
+            return 0;
+        }
+
+        Dataran raidenSebelumnya = this.raiden;
+
         int tinggiSebelumnya = this.raiden.getTinggi();
 
-        while (s > 0 && !this.raiden.equals(this.last)) {
+        // Jika ke kanan tidak ada yg sama lagi.
+        Dataran temp = this.raiden;
+
+        while (s > 0 && this.raiden.getNext() != null) {
             this.raiden = this.raiden.getNext();
 
             if (this.raiden.getTinggi() == tinggiSebelumnya) {
+                temp = this.raiden; // Jika ke kanan tidak ada yg sama lagi.
                 s--;
             }
         }
 
-        return this.raiden.getPrevious().getTinggi();
+        // Pindahkan pointer raiden.
+        this.raiden = temp;
+
+        if (raidenSebelumnya.equals(temp)) { // Jika tidak berpindah tempat
+            return 0;
+        }
+
+        return temp.getPrevious().getTinggi();
     }
 
     public int crumble() {
@@ -382,17 +419,18 @@ public class TP2 {
         String currentRaiden = pulauRaiden;
 
         // Mencari pulau tempat Raiden.
-        Pulau tempatRaiden = seluruhKuil.get(pulauRaiden);
+        Pulau tempatRaiden = seluruhKuil.get(currentRaiden);
 
-        // Set pointer raiden
-        Dataran raiden = tempatRaiden.getRaiden();
-        raiden = tempatRaiden.getFirst();
+        // Menginisiasi pointer Raiden yang mulanya di first.
+        tempatRaiden.inisiasiRaiden(dataranRaiden);
+        // // Set pointer raiden
+        // Dataran raiden = tempatRaiden.getRaiden();
 
-        if (dataranRaiden >= 2) {
-            for (int count = 0; count < dataranRaiden - 1; count++) {
-                raiden = raiden.getNext();
-            }
-        }
+        // if (dataranRaiden >= 2) {
+        // for (int count = 0; count < dataranRaiden - 1; count++) {
+        // raiden = raiden.getNext();
+        // }
+        // }
 
         // Command dari Archons
         int banyakCommand = in.nextInt();
