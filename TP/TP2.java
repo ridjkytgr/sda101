@@ -178,8 +178,8 @@ class Pulau {
             // Pindahkan last ke paling atas
             this.last = pulauNimpa.getLast();
 
-            // Menambahkan size gedung
-            this.size += pulauNimpa.size();
+            // // Menambahkan size gedung
+            // this.size += pulauNimpa.size();
         }
     }
 
@@ -188,7 +188,6 @@ class Pulau {
 
         // Current pointer (kuil kanan)
         Dataran traverseKuil2 = this.first;
-
         // Current pointer (kuil kiri)
         Dataran traverseKuil1 = this.first.getPrevious();
 
@@ -199,7 +198,7 @@ class Pulau {
         // Benar-benar memotong linked list
         pulauBesar.last = traverseKuil1;
 
-        pulauBesar.setSize(pulauBesar.size() - this.size());
+        // pulauBesar.setSize(pulauBesar.size() - this.size());
 
         // Untuk dicetak
         sb.append(pulauBesar.size());
@@ -408,11 +407,16 @@ public class TP2 {
 
                 // Membuat nested LinkedList
                 Pulau current = seluruhKuil.get(pulauU);
-
                 // Jika sebelumnya sudah pernah melakukan unifikasi.
-                while (current.getNextPulau() != null) {
-                    current = current.getNextPulau();
-                    // Tambahkan size dari kuil yang dependen
+                if (current.getNextPulau() != null) {
+                    while (current.getNextPulau() != null) {
+                        // Tambahkan size dari kuil yang dependen
+                        current.setSize(current.size() + seluruhKuil.get(pulauV).size());
+                        current = current.getNextPulau();
+                    }
+                    // Untuk elemen paling terakhir (karena ini ga masuk pas while loop)
+                    current.setSize(current.size() + seluruhKuil.get(pulauV).size());
+                } else { // Jika sebelumnya belum pernah unifikasi.
                     current.setSize(current.size() + seluruhKuil.get(pulauV).size());
                 }
                 current.setNextPulau(seluruhKuil.get(pulauV));
@@ -425,18 +429,23 @@ public class TP2 {
                 seluruhPulau.put(pulauV, seluruhPulau.get(pulauU));
 
                 // Cetak berapa banyak dataran di pulau baru.
-                out.println(seluruhPulau.get(pulauU).size());
+                out.println(seluruhKuil.get(pulauU).size());
             } else if (cmd.equals("PISAH")) {
                 String kuilU = in.next();
 
                 // Untuk mencari reference pulau paling kiri (paling besar)
                 Pulau current1 = seluruhKuil.get(kuilU);
-                while (current1.getPreviousPulau() != null) {
-                    current1 = current1.getPreviousPulau();
+                if (current1.getPreviousPulau() != null) {
+                    while (current1.getPreviousPulau() != null) {
+                        current1 = current1.getPreviousPulau();
+                        current1.setSize(current1.size() - seluruhKuil.get(kuilU).size());
+                    }
+                } else {
+                    current1.setSize(current1.size() - seluruhKuil.get(kuilU).size());
                 }
-
                 // Memotong nested Linked List
                 Pulau previousKuil = seluruhKuil.get(kuilU).getPreviousPulau();
+                // System.out.println(previousKuil.getFirst().getNamaKuil()); // Debug
                 seluruhKuil.get(kuilU).setPreviousPulau(null);
                 seluruhKuil.get(previousKuil.getFirst().getNamaKuil()).setNextPulau(null);
 
