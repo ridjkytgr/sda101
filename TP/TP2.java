@@ -351,7 +351,6 @@ public class TP2 {
         out = new PrintWriter(outputStream);
 
         // Struktur data tambahan
-        Map<String, Pulau> seluruhPulau = new HashMap<String, Pulau>();
         Map<String, Pulau> seluruhKuil = new HashMap<String, Pulau>();
 
         // Instantiate pulau-pulau
@@ -372,7 +371,6 @@ public class TP2 {
             }
 
             // Masukkan semua ke dalam hashmap.
-            seluruhPulau.put(namaPulau, newPulau);
             seluruhKuil.put(namaPulau, newPulau);
         }
 
@@ -384,7 +382,7 @@ public class TP2 {
         String currentRaiden = pulauRaiden;
 
         // Mencari pulau tempat Raiden.
-        Pulau tempatRaiden = seluruhPulau.get(pulauRaiden);
+        Pulau tempatRaiden = seluruhKuil.get(pulauRaiden);
 
         // Set pointer raiden
         Dataran raiden = tempatRaiden.getRaiden();
@@ -423,10 +421,7 @@ public class TP2 {
                 seluruhKuil.get(pulauV).setPreviousPulau(current);
 
                 // Lakukan proses unifikasi
-                seluruhPulau.get(pulauU).unifikasi(seluruhPulau.get(pulauV));
-
-                // Redirect ke pulau yang lebih besar biar bisa diambil kalo pas pisah.
-                seluruhPulau.put(pulauV, seluruhPulau.get(pulauU));
+                seluruhKuil.get(pulauU).unifikasi(seluruhKuil.get(pulauV));
 
                 // Cetak berapa banyak dataran di pulau baru.
                 out.println(seluruhKuil.get(pulauU).size());
@@ -450,15 +445,7 @@ public class TP2 {
                 seluruhKuil.get(previousKuil.getFirst().getNamaKuil()).setNextPulau(null);
 
                 StringBuilder sb = seluruhKuil.get(kuilU).pisah(current1);
-                seluruhPulau.put(kuilU, seluruhKuil.get(kuilU));
-
-                // Memindahkan reference pulau-pulau di kanan yang dipotong
-                Pulau current2 = seluruhKuil.get(kuilU);
-
-                while (current2.getNextPulau() != null) {
-                    current2 = current2.getNextPulau();
-                    seluruhPulau.put(current2.getFirst().getNamaKuil(), seluruhPulau.get(kuilU));
-                }
+                seluruhKuil.put(kuilU, seluruhKuil.get(kuilU));
 
                 // Cetak hasilnya
                 out.println(sb);
