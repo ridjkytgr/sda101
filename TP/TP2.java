@@ -98,7 +98,6 @@ class Pulau {
         // first.setIsKuil(true);
         this.first = first;
         this.last = first;
-        this.raiden = first;
         size = 1;
     }
 
@@ -155,7 +154,6 @@ class Pulau {
             pulauBangun.setIsKuil(true);
             this.first = pulauBangun;
             this.last = pulauBangun;
-            this.raiden = pulauBangun;
         } else { // Untuk Dataran yang bukan paling kiri (non-kuil)
             pulauBangun = new Dataran(namaKuil, tinggi);
 
@@ -177,9 +175,6 @@ class Pulau {
 
             // Pindahkan last ke paling atas
             this.last = pulauNimpa.getLast();
-
-            // // Menambahkan size gedung
-            // this.size += pulauNimpa.size();
         }
     }
 
@@ -198,8 +193,6 @@ class Pulau {
         // Benar-benar memotong linked list
         pulauBesar.last = traverseKuil1;
 
-        // pulauBesar.setSize(pulauBesar.size() - this.size());
-
         // Untuk dicetak
         sb.append(pulauBesar.size());
         sb.append(" ");
@@ -209,6 +202,7 @@ class Pulau {
     }
 
     public void inisiasiRaiden(int s) {
+        this.raiden = this.first;
         if (s >= 2) {
             for (int i = 0; i < s - 1; i++) {
                 this.raiden = this.raiden.getNext();
@@ -223,7 +217,7 @@ class Pulau {
                 break;
             }
 
-            this.raiden = this.raiden.getPrevious();
+            System.out.println(this.raiden.getTinggi());
         }
         return this.raiden.getTinggi();
     }
@@ -247,10 +241,6 @@ class Pulau {
     }
 
     public int tebasKiri(int s) {
-        if (this.size() == 1 && s > 0) { // Jika tidak bergerak
-            return 0;
-        }
-
         Dataran raidenSebelumnya = this.raiden;
 
         int tinggiSebelumnya = this.raiden.getTinggi();
@@ -279,10 +269,6 @@ class Pulau {
     }
 
     public int tebasKanan(int s) {
-        if (this.size() == 1 && s > 0) { // Jika tidak bergerak
-            return 0;
-        }
-
         Dataran raidenSebelumnya = this.raiden;
 
         int tinggiSebelumnya = this.raiden.getTinggi();
@@ -317,20 +303,21 @@ class Pulau {
             return 0;
         }
 
-        if (this.raiden.equals(this.last)) { // Jika raiden ada di Dataran paling kanan
+        if (this.raiden.getNext() == null) { // Jika raiden ada di Dataran paling kanan
             Dataran beforeBaru = this.raiden.getPrevious();
 
-            this.raiden = null;
+            // Motong linked list
+            beforeBaru.setNext(null);
+            this.raiden.setPrevious(null);
+
             this.raiden = beforeBaru;
             this.last = this.raiden;
 
             this.size--;
-        } else if (this.raiden.equals(this.first)) { // Jika raiden ada di Dataran paling kiri (Di kuil)
-            return 0;
         } else { // Kalo raiden ada di tengah.
             Dataran nextBaru = this.raiden.getNext();
 
-            // Agar tidak kehilangan referensi
+            // Agar tidak kehilangan referensi (kiri dataran baru)
             this.raiden.getPrevious().setNext(nextBaru);
             nextBaru.setPrevious(this.raiden.getPrevious());
 
@@ -344,7 +331,7 @@ class Pulau {
     }
 
     public int stabilize() {
-        if (this.raiden.getIsKuil() || this.raiden.equals(this.first)) {
+        if (this.raiden.getIsKuil()) {
             return 0;
         }
 
@@ -355,7 +342,7 @@ class Pulau {
         // Bikin dataran baru yang memiliki tinggi lebih rendah.
         Dataran dataranStabilize = new Dataran(x);
 
-        if (this.raiden.equals(this.last)) { // Raiden shogun di paling kanan
+        if (this.raiden.getNext() == null) { // Raiden shogun di paling kanan
             // Mengarahkan next dan previous.
             this.raiden.setNext(dataranStabilize);
             dataranStabilize.setPrevious(this.raiden);
@@ -371,6 +358,8 @@ class Pulau {
             this.raiden.setNext(dataranStabilize);
             dataranStabilize.setPrevious(this.raiden);
         }
+
+        this.size++;
 
         return dataranStabilize.getTinggi();
     }
@@ -423,14 +412,6 @@ public class TP2 {
 
         // Menginisiasi pointer Raiden yang mulanya di first.
         tempatRaiden.inisiasiRaiden(dataranRaiden);
-        // // Set pointer raiden
-        // Dataran raiden = tempatRaiden.getRaiden();
-
-        // if (dataranRaiden >= 2) {
-        // for (int count = 0; count < dataranRaiden - 1; count++) {
-        // raiden = raiden.getNext();
-        // }
-        // }
 
         // Command dari Archons
         int banyakCommand = in.nextInt();
@@ -483,7 +464,6 @@ public class TP2 {
                 seluruhKuil.get(previousKuil.getFirst().getNamaKuil()).setNextPulau(null);
 
                 StringBuilder sb = seluruhKuil.get(kuilU).pisah(current1);
-                seluruhKuil.put(kuilU, seluruhKuil.get(kuilU));
 
                 // Cetak hasilnya
                 out.println(sb);
@@ -514,8 +494,23 @@ public class TP2 {
                 }
             } else if (cmd.equals("CRUMBLE")) {
                 out.println(seluruhKuil.get(currentRaiden).crumble());
+
+                // Update pulau yang ada di kiri
+                Pulau setSize = seluruhKuil.get(currentRaiden);
+                while (setSize.getPreviousPulau() != null) {
+                    setSize = setSize.getPreviousPulau();
+                    setSize.setSize(setSize.size() - 1);
+                }
+
             } else if (cmd.equals("STABILIZE")) {
                 out.println(seluruhKuil.get(currentRaiden).stabilize());
+
+                // Update pulau yang ada di kiri
+                Pulau setSize = seluruhKuil.get(currentRaiden);
+                while (setSize.getPreviousPulau() != null) {
+                    setSize = setSize.getPreviousPulau();
+                    setSize.setSize(setSize.size() + 1);
+                }
             }
         }
 
@@ -536,6 +531,19 @@ public class TP2 {
         while (current != null) {
             sb.append(current.getTinggi());
             sb.append(" ");
+            // sb.append("==========\n");
+            // if (current.getPrevious() != null) {
+            // sb.append("PREVIOUSNYA: " + current.getPrevious().getTinggi() + " " + "\n");
+            // } else {
+            // sb.append("GA ADA PREV\n");
+            // }
+
+            // sb.append("==========\n");
+            // if (current.getNext() != null) {
+            // sb.append("NEXTNYA: " + current.getNext().getTinggi() + " " + "\n");
+            // } else {
+            // sb.append("GA ADA NEXT\n");
+            // }
             current = current.getNext();
         }
 
