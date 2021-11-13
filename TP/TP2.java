@@ -74,6 +74,10 @@ class Dataran {
     public void setIsKuil(boolean truthValue) {
         this.isKuil = truthValue;
     }
+
+    public void setTinggi(int tinggiBaru) {
+        this.tinggi = tinggiBaru;
+    }
 }
 
 class Pulau {
@@ -216,8 +220,7 @@ class Pulau {
             if (this.raiden.getPrevious() == null) {
                 break;
             }
-
-            System.out.println(this.raiden.getTinggi());
+            this.raiden = this.raiden.getPrevious();
         }
         return this.raiden.getTinggi();
     }
@@ -234,7 +237,7 @@ class Pulau {
         return this.raiden.getTinggi();
     }
 
-    public int teleportasi(String namaKuil) {
+    public int teleportasi() {
         this.raiden = this.getFirst();
 
         return this.raiden.getTinggi();
@@ -363,6 +366,64 @@ class Pulau {
 
         return dataranStabilize.getTinggi();
     }
+
+    public int rise(int h, int x) {
+        Dataran current = this.first;
+
+        int count = 0;
+        while (current.getNext() != null) {
+            if (current.getTinggi() > h) {
+                count++;
+                current.setTinggi(current.getTinggi() + x);
+            }
+            current = current.getNext();
+        }
+
+        if (current.getNext() == null && current.getTinggi() > h) {
+            count++;
+            current.setTinggi(current.getTinggi() + x);
+        }
+
+        return count;
+    }
+
+    public int quake(int h, int x) {
+        Dataran current = this.first;
+
+        int count = 0;
+        while (current.getNext() != null) {
+            if (current.getTinggi() < h) {
+                count++;
+                current.setTinggi(current.getTinggi() - x);
+            }
+            current = current.getNext();
+        }
+
+        if (current.getNext() == null && current.getTinggi() < h) {
+            count++;
+            current.setTinggi(current.getTinggi() - x);
+        }
+
+        return count;
+    }
+
+    public int sweeping(int l) {
+        Dataran current = this.first;
+
+        int count = 0;
+        while (current.getNext() != null) {
+            if (current.getTinggi() < l) {
+                count++;
+            }
+            current = current.getNext();
+        }
+
+        if (current.getNext() == null && current.getTinggi() < l) {
+            count++;
+        }
+
+        return count;
+    }
 }
 
 public class TP2 {
@@ -477,13 +538,16 @@ public class TP2 {
             } else if (cmd.equals("TELEPORTASI")) {
                 String kuilTeleportasi = in.next();
 
+                // Reset pointer raiden di pulau sebelumnya.
+                seluruhKuil.get(currentRaiden).raiden = null;
+
                 // Pindahkan letak raiden.
                 currentRaiden = kuilTeleportasi;
 
                 // Cari kuil tempat Raiden harus diteleportasi
                 Pulau kuilRaiden = seluruhKuil.get(kuilTeleportasi);
 
-                out.println(kuilRaiden.teleportasi(kuilTeleportasi));
+                out.println(kuilRaiden.teleportasi());
             } else if (cmd.equals("TEBAS")) {
                 String arah = in.next();
                 if (arah.equals("KIRI")) {
@@ -511,6 +575,28 @@ public class TP2 {
                     setSize = setSize.getPreviousPulau();
                     setSize.setSize(setSize.size() + 1);
                 }
+            } else if (cmd.equals("RISE")) {
+                String u = in.next();
+
+                int h = in.nextInt();
+
+                int x = in.nextInt();
+
+                out.println(seluruhKuil.get(u).rise(h, x));
+            } else if (cmd.equals("QUAKE")) {
+                String u = in.next();
+
+                int h = in.nextInt();
+
+                int x = in.nextInt();
+
+                out.println(seluruhKuil.get(u).quake(h, x));
+            } else if (cmd.equals("SWEEPING")) {
+                String u = in.next();
+
+                int l = in.nextInt();
+
+                out.println(seluruhKuil.get(u).sweeping(l));
             }
         }
 
