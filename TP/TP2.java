@@ -1,3 +1,9 @@
+
+/**
+ * Nama: Ridjky Tegar Perkasa (2006525330)
+ * Referensi: Sabyna Maharani
+ */
+
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -8,7 +14,7 @@ import java.util.*;
 
 class Dataran {
     String namaKuil;
-    int tinggi;
+    long tinggi;
     Dataran next;
 
     // Kuil kalau element first
@@ -18,18 +24,18 @@ class Dataran {
     Dataran previous;
 
     // Constructors
-    public Dataran(String namaKuil, int tinggi, Dataran previous, Dataran next) {
+    public Dataran(String namaKuil, long tinggi, Dataran previous, Dataran next) {
         this.namaKuil = namaKuil;
         this.tinggi = tinggi;
         this.previous = previous;
         this.next = next;
     }
 
-    public Dataran(String namaKuil, int tinggi) {
+    public Dataran(String namaKuil, long tinggi) {
         this(namaKuil, tinggi, null, null);
     }
 
-    public Dataran(int tinggi) {
+    public Dataran(long tinggi) {
         this(null, tinggi, null, null);
     }
 
@@ -46,7 +52,7 @@ class Dataran {
         return this.namaKuil;
     }
 
-    public int getTinggi() {
+    public long getTinggi() {
         return this.tinggi;
     }
 
@@ -75,7 +81,7 @@ class Dataran {
         this.isKuil = truthValue;
     }
 
-    public void setTinggi(int tinggiBaru) {
+    public void setTinggi(long tinggiBaru) {
         this.tinggi = tinggiBaru;
     }
 }
@@ -212,7 +218,7 @@ class Pulau {
         }
     }
 
-    public int gerakKiri(int s) {
+    public long gerakKiri(int s) {
         for (int step = 0; step < s; step++) {
             // Jika sudah berada di paling kiri.
             if (this.raiden.getPrevious() == null) {
@@ -223,7 +229,7 @@ class Pulau {
         return this.raiden.getTinggi();
     }
 
-    public int gerakKanan(int s) {
+    public long gerakKanan(int s) {
         for (int step = 0; step < s; step++) {
             // Jika sudah berada di paling kanan.
             if (this.raiden.getNext() == null) {
@@ -235,16 +241,16 @@ class Pulau {
         return this.raiden.getTinggi();
     }
 
-    public int teleportasi() {
+    public long teleportasi() {
         this.raiden = this.getFirst();
 
         return this.raiden.getTinggi();
     }
 
-    public int tebasKiri(int s) {
+    public long tebasKiri(int s) {
         Dataran raidenSebelumnya = this.raiden;
 
-        int tinggiSebelumnya = this.raiden.getTinggi();
+        long tinggiSebelumnya = this.raiden.getTinggi();
 
         // Jika ke kiri tidak ada yg sama lagi.
         Dataran temp = this.raiden;
@@ -269,10 +275,10 @@ class Pulau {
 
     }
 
-    public int tebasKanan(int s) {
+    public long tebasKanan(int s) {
         Dataran raidenSebelumnya = this.raiden;
 
-        int tinggiSebelumnya = this.raiden.getTinggi();
+        long tinggiSebelumnya = this.raiden.getTinggi();
 
         // Jika ke kanan tidak ada yg sama lagi.
         Dataran temp = this.raiden;
@@ -296,8 +302,8 @@ class Pulau {
         return temp.getPrevious().getTinggi();
     }
 
-    public int crumble() {
-        int tinggiDihancurkan = this.raiden.getTinggi();
+    public long crumble() {
+        long tinggiDihancurkan = this.raiden.getTinggi();
 
         // Hilangkan daratan lalu pindahkan raiden ke kiri.
         if (this.raiden.getIsKuil()) { // Kalo kuil langsung return 0.
@@ -313,8 +319,6 @@ class Pulau {
 
             this.raiden = beforeBaru;
             this.last = this.raiden;
-
-            this.size--;
         } else { // Kalo raiden ada di tengah.
             Dataran nextBaru = this.raiden.getNext();
 
@@ -324,20 +328,20 @@ class Pulau {
 
             // Memindahkan raiden ke belakang
             this.raiden = this.raiden.getPrevious();
-
-            this.size--;
         }
+
+        this.size--;
 
         return tinggiDihancurkan;
     }
 
-    public int stabilize() {
+    public long stabilize() {
         if (this.raiden.getIsKuil()) {
             return 0;
         }
 
         // Menyimpan tinggi dataran yang lebih rendah ke variabel x
-        int x = this.raiden.getTinggi() > this.raiden.getPrevious().getTinggi() ? this.raiden.getPrevious().getTinggi()
+        long x = this.raiden.getTinggi() > this.raiden.getPrevious().getTinggi() ? this.raiden.getPrevious().getTinggi()
                 : this.raiden.getTinggi();
 
         // Bikin dataran baru yang memiliki tinggi lebih rendah.
