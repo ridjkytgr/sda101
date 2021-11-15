@@ -369,10 +369,10 @@ class Pulau {
         return dataranStabilize.getTinggi();
     }
 
-    public int rise(int h, int x) {
+    public long rise(int h, int x) {
         Dataran current = this.first;
 
-        int count = 0;
+        long count = 0;
         while (current.getNext() != null) {
             if (current.getTinggi() > h) {
                 count++;
@@ -389,10 +389,10 @@ class Pulau {
         return count;
     }
 
-    public int quake(int h, int x) {
+    public long quake(int h, int x) {
         Dataran current = this.first;
 
-        int count = 0;
+        long count = 0;
         while (current.getNext() != null) {
             if (current.getTinggi() < h) {
                 count++;
@@ -409,10 +409,10 @@ class Pulau {
         return count;
     }
 
-    public int sweeping(int l) {
+    public long sweeping(int l) {
         Dataran current = this.first;
 
-        int count = 0;
+        long count = 0;
         while (current.getNext() != null) {
             if (current.getTinggi() < l) {
                 count++;
@@ -534,7 +534,7 @@ public class TP2 {
 
                 // Memotong nested Linked List
                 Pulau previousKuil = seluruhKuil.get(kuilU).getPreviousPulau();
-                // System.out.println(previousKuil.getFirst().getNamaKuil()); // Debug
+
                 seluruhKuil.get(kuilU).setPreviousPulau(null);
                 seluruhKuil.get(previousKuil.getFirst().getNamaKuil()).setNextPulau(null);
 
@@ -617,50 +617,6 @@ public class TP2 {
         // don't forget to close/flush the output
         out.flush();
 
-    }
-
-    /**
-     * Printing LinkedList (for debugging purposes)
-     * 
-     * @param ll LinkedLIst that wanna be printed
-     */
-    public static void printLL(Pulau ll) {
-        StringBuilder sb = new StringBuilder();
-
-        Dataran current = ll.getFirst();
-        while (current != null) {
-            sb.append(current.getTinggi());
-            sb.append(" ");
-            // sb.append("==========\n");
-            // if (current.getPrevious() != null) {
-            // sb.append("PREVIOUSNYA: " + current.getPrevious().getTinggi() + " " + "\n");
-            // } else {
-            // sb.append("GA ADA PREV\n");
-            // }
-
-            // sb.append("==========\n");
-            // if (current.getNext() != null) {
-            // sb.append("NEXTNYA: " + current.getNext().getTinggi() + " " + "\n");
-            // } else {
-            // sb.append("GA ADA NEXT\n");
-            // }
-            current = current.getNext();
-        }
-
-        out.println(sb);
-    }
-
-    /**
-     * Printing HashMap (for debugging purposes)
-     * 
-     * @param hm Hashmap that wanna be printed
-     */
-    public static void printHM(Map<String, Pulau> hm) {
-        hm.forEach((key, value) -> {
-            out.println(key);
-            printLL(value);
-            out.println("==============================");
-        });
     }
 
     // taken from https://codeforces.com/submissions/Petr
