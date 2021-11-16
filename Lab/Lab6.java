@@ -70,24 +70,36 @@ public class Lab6 {
                     tinggiBaru = Math.max(minimum.getTinggi(), Math.max(tetangga1.getTinggi(), tetangga2.getTinggi()));
                     minimum.setTinggi(tinggiBaru);
                     heap.u(minimum);
+                    // out.println(heap.print());
+                    if (tetangga1.getTinggi() < tetangga2.getTinggi()) {
+                        tetangga1.setTinggi(tinggiBaru);
+                        heap.u(tetangga1);
+                        // out.println(heap.print());
 
-                    tetangga1.setTinggi(tinggiBaru);
-                    heap.u(tetangga1);
+                        tetangga2.setTinggi(tinggiBaru);
+                        heap.u(tetangga2);
+                        // out.println(heap.print());
+                    } else {
+                        tetangga2.setTinggi(tinggiBaru);
+                        heap.u(tetangga2);
 
-                    tetangga2.setTinggi(tinggiBaru);
-                    heap.u(tetangga2);
+                        tetangga1.setTinggi(tinggiBaru);
+                        heap.u(tetangga1);
+                    }
+
                 } else if (tetangga1 != null && tetangga2 == null) {
                     tinggiBaru = Math.max(minimum.getTinggi(), tetangga1.getTinggi());
                     minimum.setTinggi(tinggiBaru);
                     heap.u(minimum);
+
                     tetangga1.setTinggi(tinggiBaru);
                     heap.u(tetangga1);
                 } else if (tetangga1 == null && tetangga2 != null) {
                     tinggiBaru = Math.max(minimum.getTinggi(), tetangga2.getTinggi());
                     minimum.setTinggi(tinggiBaru);
                     heap.u(minimum);
-                    tetangga2.setTinggi(tinggiBaru);
 
+                    tetangga2.setTinggi(tinggiBaru);
                     heap.u(tetangga2);
                 } else if (tetangga1 == null && tetangga2 == null) {
                     tinggiBaru = minimum.getTinggi();
@@ -99,8 +111,8 @@ public class Lab6 {
 
                 out.println(sb);
             }
+            // out.println(heap.print());
         }
-        // out.println(heap.print());
         out.flush();
     }
 
@@ -208,25 +220,63 @@ class MinHeap {
     // Method 6
     // To heapify the node at pos
     private void minHeapify(int pos) {
-
         // If the node is a non-leaf node and greater
         // than any of its child
         if (!isLeaf(pos)) {
-            if (Heap[pos].getTinggi() > Heap[leftChild(pos)].getTinggi()
-                    || Heap[pos].getTinggi() > Heap[rightChild(pos)].getTinggi()) {
+            if (Heap[leftChild(pos)] != null && Heap[rightChild(pos)] != null) {
+                if (Heap[leftChild(pos)].getTinggi() == Heap[rightChild(pos)].getTinggi()
+                        && Heap[pos].getTinggi() > Heap[leftChild(pos)].getTinggi()) {
+                    Dataran dataranSwap = Heap[rightChild(pos)].getUrutan() < Heap[leftChild(pos)].getUrutan()
+                            ? Heap[rightChild(pos)]
+                            : Heap[leftChild(pos)];
+                    int nextHeap = dataranSwap.getUrutanHeap();
 
-                // Swap with the left child and heapify
-                // the left child
-                if (Heap[leftChild(pos)].getTinggi() < Heap[rightChild(pos)].getTinggi()) {
+                    swap(pos, dataranSwap.getUrutanHeap());
+                    minHeapify(nextHeap);
+                } else if (Heap[pos].getTinggi() > Heap[leftChild(pos)].getTinggi()
+                        || Heap[pos].getTinggi() > Heap[rightChild(pos)].getTinggi()) {
+
+                    // Swap with the left child and heapify
+                    // the left child
+                    if (Heap[leftChild(pos)].getTinggi() < Heap[rightChild(pos)].getTinggi()) {
+                        swap(pos, leftChild(pos));
+                        minHeapify(leftChild(pos));
+                    }
+
+                    // Swap with the right child and heapify
+                    // the right child
+                    else {
+                        swap(pos, rightChild(pos));
+                        minHeapify(rightChild(pos));
+                    }
+                } else if (Heap[pos].getTinggi() == Heap[leftChild(pos)].getTinggi()
+                        && Heap[pos].getTinggi() == Heap[rightChild(pos)].getTinggi()) {
+                    Dataran dataranSwap = Heap[rightChild(pos)].getUrutan() < Heap[leftChild(pos)].getUrutan()
+                            ? Heap[rightChild(pos)]
+                            : Heap[leftChild(pos)];
+                    if (dataranSwap.getUrutan() < Heap[pos].getUrutan()) {
+                        int nextHeap = dataranSwap.getUrutanHeap();
+                        swap(pos, dataranSwap.getUrutanHeap());
+                        minHeapify(nextHeap);
+                    }
+                } else if (Heap[pos].getTinggi() == Heap[leftChild(pos)].getTinggi()
+                        && Heap[pos].getUrutan() > Heap[leftChild(pos)].getUrutan()) {
                     swap(pos, leftChild(pos));
                     minHeapify(leftChild(pos));
-                }
-
-                // Swap with the right child and heapify
-                // the right child
-                else {
+                } else if (Heap[pos].getTinggi() == Heap[rightChild(pos)].getTinggi()
+                        && Heap[pos].getUrutan() > Heap[rightChild(pos)].getUrutan()) {
                     swap(pos, rightChild(pos));
                     minHeapify(rightChild(pos));
+                }
+            } else { // Jika hanya ada child yang kiri
+                if (Heap[leftChild(pos)].getTinggi() < Heap[pos].getTinggi()) {
+                    swap(pos, leftChild(pos));
+                    minHeapify(leftChild(pos));
+                } else if (Heap[leftChild(pos)].getTinggi() == Heap[pos].getTinggi()) { // Jika sama
+                    if (Heap[pos].getUrutan() > Heap[leftChild(pos)].getUrutan()) {
+                        swap(pos, leftChild(pos));
+                        minHeapify(leftChild(pos));
+                    }
                 }
             }
         }
@@ -257,10 +307,15 @@ class MinHeap {
         for (int i = 1; i <= size / 2; i++) {
 
             // Printing the parent and both childrens
-            sb.append(" PARENT : " + Heap[i].getTinggi() + "(" + Heap[i].getUrutan() + ")" + " LEFT CHILD : "
-                    + Heap[2 * i].getTinggi() + "(" + Heap[2 * i].getUrutan() + ")" + " RIGHT CHILD :"
-                    + Heap[2 * i + 1].getTinggi() + "(" + Heap[2 * i + 1].getUrutan() + ")");
+            if (Heap[2 * i + 1] != null) {
+                sb.append(" PARENT : " + Heap[i].getTinggi() + "(" + Heap[i].getUrutan() + ")" + " LEFT CHILD : "
+                        + Heap[2 * i].getTinggi() + "(" + Heap[2 * i].getUrutan() + ")" + " RIGHT CHILD :"
+                        + Heap[2 * i + 1].getTinggi() + "(" + Heap[2 * i + 1].getUrutan() + ")");
+            } else {
+                sb.append(" PARENT : " + Heap[i].getTinggi() + "(" + Heap[i].getUrutan() + ")" + " LEFT CHILD : "
+                        + Heap[2 * i].getTinggi() + "(" + Heap[2 * i].getUrutan() + ")");
 
+            }
             // By here new line is required
             sb.append("\n");
         }
@@ -301,54 +356,10 @@ class MinHeap {
                     break;
                 }
             }
-        } else if (current == 0) { // Di root
-            // Mencari node mana yang terkecil
-            Dataran downRoute = null;
-            if (Heap[rightChild(current)] != null) {
-                if (Heap[rightChild(current)].getTinggi() != Heap[leftChild(current)].getTinggi()) {
-                    downRoute = Math.min(Heap[leftChild(current)].getTinggi(),
-                            Heap[rightChild(current)].getTinggi()) == Heap[leftChild(current)].getTinggi()
-                                    ? Heap[leftChild(current)]
-                                    : Heap[rightChild(current)];
-                } else { // Kalo tingginya sama berarti ambil yang urutannya lebih kecil.
-                    downRoute = Heap[rightChild(current)].getUrutan() < Heap[leftChild(current)].getUrutan()
-                            ? Heap[rightChild(current)]
-                            : Heap[leftChild(current)];
-                }
-            } else { // Jika hanya ada left child.
-                downRoute = Heap[leftChild(current)];
-            }
-            while (Heap[current].getTinggi() >= downRoute.getTinggi()) {
-                if (Heap[current].getTinggi() > downRoute.getTinggi()) {
-                    swap(current, downRoute.getUrutanHeap());
-                    current = downRoute.getUrutanHeap();
-                } else if (Heap[current].getTinggi() == downRoute.getTinggi()
-                        && downRoute.getUrutan() < Heap[current].getUrutan()) {
-                    swap(current, downRoute.getUrutanHeap());
-                    current = downRoute.getUrutanHeap();
-                } else {
-                    break;
-                }
-            }
-
-        } else { // Kalo ada di tengah (punya parent dan child)
-            // Mencari node mana yang terkecil
-            Dataran downRoute = null;
-            if (Heap[rightChild(current)] != null) {
-                if (Heap[rightChild(current)].getTinggi() != Heap[leftChild(current)].getTinggi()) {
-                    downRoute = Math.min(Heap[leftChild(current)].getTinggi(),
-                            Heap[rightChild(current)].getTinggi()) == Heap[leftChild(current)].getTinggi()
-                                    ? Heap[leftChild(current)]
-                                    : Heap[rightChild(current)];
-                } else { // Kalo tingginya sama berarti ambil yang urutannya lebih kecil.
-                    downRoute = Heap[rightChild(current)].getUrutan() < Heap[leftChild(current)].getUrutan()
-                            ? Heap[rightChild(current)]
-                            : Heap[leftChild(current)];
-                }
-            } else { // Jika hanya ada left child.
-                downRoute = Heap[leftChild(current)];
-            }
-            while (Heap[current].getTinggi() <= Heap[parent(current)].getTinggi()) {
+        } else if (current == FRONT) { // Di root
+            minHeapify(current);
+        } else {
+            while (Heap[current].getTinggi() <= Heap[parent(current)].getTinggi()) { // Cek ke atas
                 if (Heap[current].getTinggi() < Heap[parent(current)].getTinggi()) { // lebih kecil di atas.
                     swap(current, parent(current));
                     current = parent(current);
@@ -360,18 +371,11 @@ class MinHeap {
                     break;
                 }
             }
-            while (Heap[current].getTinggi() >= downRoute.getTinggi()) { // Kalo lebih besar dari left child
-                if (Heap[current].getTinggi() > downRoute.getTinggi()) {
-                    swap(current, downRoute.getUrutanHeap());
-                    current = downRoute.getUrutanHeap();
-                } else if (Heap[current].getTinggi() == downRoute.getTinggi()
-                        && downRoute.getUrutan() < Heap[current].getUrutan()) {
-                    swap(current, downRoute.getUrutanHeap());
-                    current = downRoute.getUrutanHeap();
-                } else {
-                    break;
-                }
+
+            if (Heap[leftChild(current)] != null) {
+                minHeapify(current); // Cek bawah
             }
+
         }
     }
 }
