@@ -229,7 +229,8 @@ class MinHeap {
         if (!isLeaf(pos)) {
             if (Heap[leftChild(pos)] != null && Heap[rightChild(pos)] != null) {
                 if (Heap[leftChild(pos)].getTinggi() == Heap[rightChild(pos)].getTinggi()
-                        && Heap[pos].getTinggi() > Heap[leftChild(pos)].getTinggi()) {
+                        && Heap[pos].getTinggi() > Heap[leftChild(pos)].getTinggi()) { // Kalo punya 2 child dan
+                                                                                       // keduanya sama besar.
                     Dataran dataranSwap = Heap[rightChild(pos)].getUrutan() < Heap[leftChild(pos)].getUrutan()
                             ? Heap[rightChild(pos)]
                             : Heap[leftChild(pos)];
@@ -238,7 +239,8 @@ class MinHeap {
                     swap(pos, dataranSwap.getUrutanHeap());
                     minHeapify(nextHeap);
                 } else if (Heap[pos].getTinggi() > Heap[leftChild(pos)].getTinggi()
-                        || Heap[pos].getTinggi() > Heap[rightChild(pos)].getTinggi()) {
+                        || Heap[pos].getTinggi() > Heap[rightChild(pos)].getTinggi()) { // Ini kasus percolate down yang
+                                                                                        // biasa.
 
                     // Swap with the left child and heapify
                     // the left child
@@ -254,7 +256,8 @@ class MinHeap {
                         minHeapify(rightChild(pos));
                     }
                 } else if (Heap[pos].getTinggi() == Heap[leftChild(pos)].getTinggi()
-                        && Heap[pos].getTinggi() == Heap[rightChild(pos)].getTinggi()) {
+                        && Heap[pos].getTinggi() == Heap[rightChild(pos)].getTinggi()) { // Kalo membentuk triangle
+                                                                                         // (parent, child sama besar)
                     Dataran dataranSwap = Heap[rightChild(pos)].getUrutan() < Heap[leftChild(pos)].getUrutan()
                             ? Heap[rightChild(pos)]
                             : Heap[leftChild(pos)];
@@ -264,19 +267,22 @@ class MinHeap {
                         minHeapify(nextHeap);
                     }
                 } else if (Heap[pos].getTinggi() == Heap[leftChild(pos)].getTinggi()
-                        && Heap[pos].getUrutan() > Heap[leftChild(pos)].getUrutan()) {
+                        && Heap[pos].getUrutan() > Heap[leftChild(pos)].getUrutan()) { // Kalo dia sama denagn left
+                                                                                       // child doang.
                     swap(pos, leftChild(pos));
                     minHeapify(leftChild(pos));
                 } else if (Heap[pos].getTinggi() == Heap[rightChild(pos)].getTinggi()
-                        && Heap[pos].getUrutan() > Heap[rightChild(pos)].getUrutan()) {
+                        && Heap[pos].getUrutan() > Heap[rightChild(pos)].getUrutan()) { // Kalo sama dengan right child
+                                                                                        // doang.
                     swap(pos, rightChild(pos));
                     minHeapify(rightChild(pos));
                 }
             } else { // Jika hanya ada child yang kiri
-                if (Heap[leftChild(pos)].getTinggi() < Heap[pos].getTinggi()) {
+                if (Heap[leftChild(pos)].getTinggi() < Heap[pos].getTinggi()) { // Ini percolate down biasa
                     swap(pos, leftChild(pos));
                     minHeapify(leftChild(pos));
-                } else if (Heap[leftChild(pos)].getTinggi() == Heap[pos].getTinggi()) { // Jika sama
+                } else if (Heap[leftChild(pos)].getTinggi() == Heap[pos].getTinggi()) { // Ini kalo sama dengan left
+                                                                                        // child.
                     if (Heap[pos].getUrutan() > Heap[leftChild(pos)].getUrutan()) {
                         swap(pos, leftChild(pos));
                         minHeapify(leftChild(pos));
@@ -347,7 +353,7 @@ class MinHeap {
     public void u(Dataran dataran) {
         int current = dataran.getUrutanHeap();
         if (isLeaf(current)) { // Di leaf.
-            while (Heap[current].getTinggi() <= Heap[parent(current)].getTinggi()) {
+            while (Heap[current].getTinggi() <= Heap[parent(current)].getTinggi()) { // Percolate up
                 if (Heap[current].getTinggi() < Heap[parent(current)].getTinggi()) {
                     swap(current, parent(current));
                     current = parent(current);
@@ -361,8 +367,9 @@ class MinHeap {
                 }
             }
         } else if (current == FRONT) { // Di root
-            minHeapify(current);
+            minHeapify(current); // Percolate down
         } else {
+            // Percolate up
             while (Heap[current].getTinggi() <= Heap[parent(current)].getTinggi()) { // Cek ke atas
                 if (Heap[current].getTinggi() < Heap[parent(current)].getTinggi()) { // lebih kecil di atas.
                     swap(current, parent(current));
@@ -376,7 +383,7 @@ class MinHeap {
                 }
             }
 
-            if (Heap[leftChild(current)] != null) {
+            if (Heap[leftChild(current)] != null) { // Percolate down
                 minHeapify(current); // Cek bawah
             }
 
