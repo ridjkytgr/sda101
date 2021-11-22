@@ -75,19 +75,6 @@ public class Lab7 {
     public static void floydWarshall(int graph[][], int N) {
         int i, j, k;
 
-        // /*
-        // * Initialize the solution matrix same as input graph matrix. Or we can say
-        // the
-        // * initial values of shortest distances are based on shortest paths
-        // considering
-        // * no intermediate vertex.
-        // */
-        // for (i = 0; i < N; i++)
-        // for (j = i; j < N; j++) {
-        // dist[i][j] = graph[i][j];
-        // dist[j][i] = graph[i][j];
-        // }
-
         /*
          * Add all vertices one by one to the set of intermediate vertices. ---> Before
          * start of an iteration, we have shortest distances between all pairs of
