@@ -1,3 +1,8 @@
+
+/**
+ * Ide: Kenshin Himura (Menggunakan Floyd-Warshall algo)
+ */
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +14,7 @@ import java.util.*;
 public class Lab7 {
     private static InputReader in;
     private static PrintWriter out;
-    private static final int INF = 9999999;
+    private static final int INF = Integer.MAX_VALUE;
     private static int[][] graph;
 
     public static void createGraph(int N) {
@@ -28,9 +33,6 @@ public class Lab7 {
     }
 
     public static int canMudik(int X, int Y, int K, int N) {
-        // Fill the graph
-        graph = floydWarshall(graph, N);
-
         // Bisa mudik
         if (graph[X - 1][Y - 1] <= K) {
             return 1;
@@ -57,13 +59,15 @@ public class Lab7 {
             int T = in.nextInt();
             addEdge(U, V, T);
         }
+
+        // Fill the graph
+        graph = floydWarshall(graph, N);
         while (Q-- > 0) {
             int X = in.nextInt();
             int Y = in.nextInt();
             int K = in.nextInt();
             out.println(canMudik(X, Y, K, N));
         }
-        // printSolution(graph, N);
         out.flush();
     }
 
@@ -78,7 +82,7 @@ public class Lab7 {
          * no intermediate vertex.
          */
         for (i = 0; i < N; i++)
-            for (j = 0; j < N; j++) {
+            for (j = i; j < N; j++) {
                 dist[i][j] = graph[i][j];
                 dist[j][i] = graph[i][j];
             }
@@ -99,11 +103,13 @@ public class Lab7 {
                 for (j = i; j < N; j++) {
                     // If vertex k is on the shortest path from
                     // i to j, then update the value of dist[i][j]
-                    if (dist[i][k] + dist[k][j] < dist[i][j]) {
-                        dist[i][j] = dist[i][k] + dist[k][j];
+                    if (dist[i][k] != INF && dist[k][j] != INF) {
+                        if (dist[i][k] + dist[k][j] < dist[i][j]) {
+                            dist[i][j] = dist[i][k] + dist[k][j];
 
-                        // Karena directed graph.
-                        dist[j][i] = dist[i][k] + dist[k][j];
+                            // Karena directed graph.
+                            dist[j][i] = dist[i][k] + dist[k][j];
+                        }
                     }
                 }
             }
