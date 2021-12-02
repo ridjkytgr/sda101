@@ -43,7 +43,7 @@ public class TP3 {
      * @return pangkat tertinggi dari teman u.
      */
     public static int carry(Graph graf, int u) {
-        if (graf.getAdj(u).getMax().getIdentitas() < 1) { // Menandakan kalau u belum punya teman.
+        if (graf.getAdj(u).getMax() == null) { // Menandakan kalau u belum punya teman.
             return 0;
         }
         return graf.getAdj(u).getMax().getPangkat();
@@ -109,7 +109,9 @@ public class TP3 {
 
                 out.println(carry(graf, u));
             } else if (kode == 4) {
+                int u = in.nextInt();
 
+                out.println(carry(graf, u));
             } else if (kode == 5) {
 
             } else if (kode == 6) {
@@ -173,7 +175,7 @@ public class TP3 {
             this.size = 0;
 
             Heap = new Karyawan[this.maxsize + 1];
-            Heap[0] = new Karyawan(0, Integer.MIN_VALUE);
+            Heap[0] = new Karyawan(0, Integer.MAX_VALUE);
         }
 
         // Method 1
@@ -260,10 +262,10 @@ public class TP3 {
             }
 
             Heap[++size] = element;
-            element.setLetakHeapWithWho(reference.getIdentitas(), size);
+            Heap[size].setLetakHeapWithWho(reference.getIdentitas(), size);
             int current = size;
 
-            while (Heap[current].getPangkat() < Heap[parent(current)].getPangkat()) {
+            while (Heap[current].getPangkat() > Heap[parent(current)].getPangkat()) {
                 swap(reference, current, parent(current));
                 current = parent(current);
             }
