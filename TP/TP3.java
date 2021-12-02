@@ -18,23 +18,19 @@ public class TP3 {
      * @param v karyawan ke-v.
      */
     public static void tambah(Graph graf, int u, int v) {
-        graf.getAdj(u).insert(dataKaryawan[u - 1], dataKaryawan[v - 1]);
-        graf.getAdj(v).insert(dataKaryawan[v - 1], dataKaryawan[u - 1]);
+        graf.getAdj(u).insert(dataKaryawan[v - 1]);
+        graf.getAdj(v).insert(dataKaryawan[u - 1]);
     }
 
-    // public static void resign(int u) {
-    // pangkat[u - 1] = -1;
+    public static void resign(Graph graf, int u) {
+        // Mengubah karyawan menjadi resign.
+        dataKaryawan[u - 1].setIsResigned(true);
 
-    // // Menghapus semua vertex u di tetangganya.
-    // while (adjList[u - 1].getMax() > 0) {
-    // int tetangga = adjList[u - 1].remove();
-    // adjList[tetangga]
-    // }
+        // Menghapus semua vertex u di tetangganya.
+        MaxHeap adjU = graf.getAdj(u);
 
-    // // Menghapus adjacency list dari karyawan ke-u tersebut.
-    // adjList[u - 1] = new MaxHeap(1);
-
-    // }
+        adjU.removeAll();
+    }
 
     /**
      * Mencari teman dari u dengan pangkat tertinggi.
@@ -43,9 +39,20 @@ public class TP3 {
      * @return pangkat tertinggi dari teman u.
      */
     public static int carry(Graph graf, int u) {
-        if (graf.getAdj(u).getMax() == null) { // Menandakan kalau u belum punya teman.
+        int extract = Integer.MIN_VALUE;
+        if (graf.getAdj(u).getMax() == null || graf.getAdj(u).getMax().getPangkat() <= 0) { // Menandakan kalau u
+                                                                                            // belum punya teman.
             return 0;
         }
+
+        if (graf.getAdj(u).getMax().getIsResigned() == true) { // Jika yang max adalah yang resign, maka hapus
+            extract = graf.getAdj(u).extractMax();
+        }
+
+        if (extract == 0) {
+            return 0;
+        }
+
         return graf.getAdj(u).getMax().getPangkat();
     }
 
@@ -74,7 +81,9 @@ public class TP3 {
         for (int i = 0; i < n; i++) {
             int pangkatKaryawan = in.nextInt();
 
-            dataKaryawan[i] = new Karyawan(i + 1, pangkatKaryawan);
+            Karyawan karyawanBaru = new Karyawan(i + 1, pangkatKaryawan);
+
+            dataKaryawan[i] = karyawanBaru;
         }
 
         // Hubungan antarkaryawwan
@@ -86,8 +95,8 @@ public class TP3 {
             MaxHeap adjList2 = graf.getAdj(m2);
 
             // Karena undirected graph.
-            adjList1.insert(dataKaryawan[m1 - 1], dataKaryawan[m2 - 1]);
-            adjList2.insert(dataKaryawan[m2 - 1], dataKaryawan[m1 - 1]);
+            adjList1.insert(dataKaryawan[m2 - 1]);
+            adjList2.insert(dataKaryawan[m1 - 1]);
 
         }
 
@@ -103,7 +112,7 @@ public class TP3 {
             } else if (kode == 2) { // Resign
                 int u = in.nextInt();
 
-                // resign(u);
+                resign(graf, u);
             } else if (kode == 3) { // Carry
                 int u = in.nextInt();
 
@@ -215,76 +224,80 @@ public class TP3 {
 
         // Method 5
         // To swap two nodes of the heap
-        private void swap(Karyawan reference, int fpos, int spos) {
+        private void swap(int fpos, int spos) {
 
             Karyawan tmp;
             tmp = Heap[fpos];
-
-            Heap[fpos].setLetakHeapWithWho(reference.getIdentitas(), spos);
-            Heap[spos].setLetakHeapWithWho(reference.getIdentitas(), fpos);
 
             Heap[fpos] = Heap[spos];
             Heap[spos] = tmp;
         }
 
-        // // Method 6
-        // // To heapify the node at pos
-        // private void maxHeapify(Karyawan reference, int pos) {
-        // // If the node is a non-leaf node and greater
-        // // than any of its child
-        // if (!isLeaf(pos)) {
-        // if (Heap[pos] < Heap[leftChild(pos)])
-        // || pangkat[pos] < pangkat[rightChild(pos)]) {
+        // Method 6
+        // To heapify the node at pos
+        private void maxHeapify(int pos) {
+            // If the node is a non-leaf node and greater
+            // than any of its child
+            if (!isLeaf(pos)) {
+                if (Heap[leftChild(pos)] != null && Heap[rightChild(pos)] != null) {
+                    if (Heap[pos].getPangkat() < Heap[leftChild(pos)].getPangkat()
+                            || Heap[pos].getPangkat() < Heap[rightChild(pos)].getPangkat()) {
 
-        // // Swap with the left child and heapify
-        // // the left child
-        // if (pangkat[leftChild(pos)] > pangkat[rightChild(pos)]) {
-        // swap(reference, pos, leftChild(pos));
-        // maxHeapify(reference, leftChild(pos));
-        // }
+                        // Swap with the left child and heapify
+                        // the left child
+                        if (Heap[leftChild(pos)].getPangkat() > Heap[rightChild(pos)].getPangkat()) {
+                            swap(pos, leftChild(pos));
+                            maxHeapify(leftChild(pos));
+                        }
 
-        // // Swap with the right child and heapify
-        // // the right child
-        // else {
-        // swap(reference, pos, rightChild(pos));
-        // maxHeapify(reference, rightChild(pos));
-        // }
-        // }
-        // }
-        // }
+                        // Swap with the right child and heapify
+                        // the right child
+                        else {
+                            swap(pos, rightChild(pos));
+                            maxHeapify(rightChild(pos));
+                        }
+                    }
+                }
+                if (Heap[leftChild(pos)] != null) { // Jika hanya ada child yang kiri
+                    if (Heap[leftChild(pos)].getPangkat() < Heap[pos].getPangkat()) { // Ini percolate down biasa
+                        swap(pos, leftChild(pos));
+                        maxHeapify(leftChild(pos));
+                    }
+                }
+            }
+        }
 
         // Method 7
         // To insert a node into the heap
-        public void insert(Karyawan reference, Karyawan element) {
+        public void insert(Karyawan element) {
 
             if (size >= maxsize) {
                 return;
             }
 
             Heap[++size] = element;
-            Heap[size].setLetakHeapWithWho(reference.getIdentitas(), size);
             int current = size;
 
             while (Heap[current].getPangkat() > Heap[parent(current)].getPangkat()) {
-                swap(reference, current, parent(current));
+                swap(current, parent(current));
                 current = parent(current);
             }
         }
 
         // Method 8
         // To print the contents of the heap
-        public StringBuilder print(Karyawan reference) {
+        public StringBuilder print() {
             StringBuilder sb = new StringBuilder();
             for (int i = 1; i <= size / 2; i++) {
 
                 // Printing the parent and both childrens
                 sb.append(" PARENT : " + Heap[i].getPangkat() + "("
-                        + Heap[i].getLetakHeapWithWho(reference.getIdentitas()) + ")"
+                        + i + ")"
                         + " LEFT CHILD : "
-                        + Heap[2 * i].getPangkat() + "(" + Heap[2 * i].getLetakHeapWithWho(reference.getIdentitas())
+                        + Heap[2 * i].getPangkat() + "(" + 2 * i
                         + ")" + " RIGHT CHILD :"
                         + Heap[2 * i + 1].getPangkat() + "("
-                        + Heap[2 * i + 1].getLetakHeapWithWho(reference.getIdentitas()) + ")");
+                        + 2 * i + 1 + ")");
 
                 // By here new line is required
                 sb.append("\n");
@@ -297,19 +310,39 @@ public class TP3 {
         public Karyawan getMax() {
             return Heap[FRONT];
         }
+
+        public int extractMax() {
+            int temp = size;
+            Karyawan popped = Heap[FRONT];
+            if (popped.equals(Heap[size])) { // Jika hanya ada 1 anggota
+                Heap[FRONT] = null;
+                size--;
+                return 0;
+            } else {
+                Heap[FRONT] = Heap[size--];
+                Heap[temp] = null;
+                maxHeapify(FRONT);
+            }
+            return -1;
+        }
+
+        public void removeAll() {
+            Heap = new Karyawan[1];
+            Heap[0] = new Karyawan(0, Integer.MAX_VALUE);
+        }
     }
 
     static class Karyawan {
         private int identitas;
         private int pangkat;
-        private int[] letakHeap;
+        private int maxFriendRank;
+        private boolean isResigned;
 
         public Karyawan(int identitas, int pangkat) {
             this.identitas = identitas;
             this.pangkat = pangkat;
-
-            // Untuk menyimpan letak karyawan pada adj orang lain.
-            this.letakHeap = new int[100000];
+            this.isResigned = false;
+            this.maxFriendRank = 0;
         }
 
         public int getIdentitas() {
@@ -320,12 +353,24 @@ public class TP3 {
             return this.pangkat;
         }
 
-        public int getLetakHeapWithWho(int karyawanTetangga) {
-            return letakHeap[karyawanTetangga - 1];
+        public int getMaxFriendRank() {
+            return this.maxFriendRank;
         }
 
-        public void setLetakHeapWithWho(int karyawanTetangga, int letakBaru) {
-            letakHeap[karyawanTetangga - 1] = letakBaru;
+        public boolean getIsResigned() {
+            return this.isResigned;
+        }
+
+        public void setIsResigned(boolean newValue) {
+            this.isResigned = newValue;
+        }
+
+        public void setPangkat(int newPangkat) {
+            this.pangkat = newPangkat;
+        }
+
+        public void setMaxFriendRank(int newMaxFriendRank) {
+            this.maxFriendRank = newMaxFriendRank;
         }
     }
 
