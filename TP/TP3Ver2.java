@@ -11,6 +11,50 @@ public class TP3Ver2 {
     public static PrintWriter out;
     public static Karyawan[] dataKaryawan = new Karyawan[100000];
     public static int banyakRentan = 0;
+    public static boolean bossStatus = false;
+    public static int[] peringkatMax = new int[1]; // Untuk menyimpan peringkat max dari network karyawan ke-i.
+
+    public static void bossHandler(Graph graf, Karyawan karyawanKe, int[] peringkatMax, int counterArray) {
+        ArrayList<Karyawan> tempNetwork;
+
+        // Lakukan pengecekan suatu network dan dapatkan ArrayList yang berisi peringkat
+        // terurut.
+        tempNetwork = graf.dfsUsingStack(karyawanKe);
+
+        // Jika tidak memiliki teman, maka keluar dari function dan set peringkatMax
+        // menjadi 0.
+        if (tempNetwork.size() == 1) { // Tidak memiliki temen (dirinya sendiri)
+            peringkatMax[karyawanKe.getIdentitas() - 1] = 0;
+        } else if (tempNetwork.size() >= 2) {
+            // Menyimpan maksimum yang paling tinggi.
+            int realMax = tempNetwork.get(tempNetwork.size() - 1).getPangkat();
+
+            // Menyimpan maksimum yang sebelumnya (untuk anggota yang memiliki pangkat max)
+            int fakeMax = tempNetwork.get(tempNetwork.size() - 2).getPangkat();
+
+            // Isi array yang menyimpan pangkat BOSS dari karyawan ke-i.
+            for (int i = 0; i < tempNetwork.size(); i++) {
+                int indexKaryawan = tempNetwork.get(i).getIdentitas() - 1;
+
+                if (dataKaryawan[indexKaryawan].getPangkat() != realMax) {
+                    peringkatMax[indexKaryawan] = realMax; // Masukkan pangkat tertinggi pada network.
+                } else {
+                    peringkatMax[indexKaryawan] = fakeMax; // Ini jika dirinya sendiri adalah pangkat tertinggi.
+                }
+            }
+        }
+
+        // Lakukan pengecekan network lain (Ganti pake while loop biar starting
+        // point-nya ga dari awal)
+        while (counterArray < peringkatMax.length) {
+            if (peringkatMax[counterArray] == -1) {
+                bossHandler(graf, dataKaryawan[counterArray], peringkatMax, counterArray++);
+                break;
+            }
+            counterArray++;
+        }
+        return;
+    }
 
     public static void main(String[] args) {
         InputStream inputStream = System.in;
@@ -68,7 +112,21 @@ public class TP3Ver2 {
             } else if (kode == 4) { // Boss
                 int u = in.nextInt();
 
-                out.println(graf.findMax(u));
+                if (bossStatus == false) {
+                    // Untuk menyimpan peringkat dari semua BOSS.
+                    peringkatMax = new int[n];
+
+                    // Status: -1 belum dikunjungi, 0 ga punya temen, sisanya peringkat BOSS-nya.
+                    Arrays.fill(peringkatMax, -1);
+
+                    bossHandler(graf, dataKaryawan[u - 1], peringkatMax, 0);
+
+                    bossStatus = true;
+
+                    out.println(peringkatMax[u - 1]);
+                } else {
+                    out.println(peringkatMax[u - 1]);
+                }
             } else if (kode == 5) { // Sebar
 
             } else if (kode == 6) { // Simulasi
@@ -83,6 +141,7 @@ public class TP3Ver2 {
     static class Graph {
         private int V; // No. of vertices
         private ArrayList<Karyawan>[] adj; // Adjacency Lists
+        private ArrayList<Karyawan> tempNetwork;
 
         // Constructor
         Graph(int v) {
@@ -187,6 +246,42 @@ public class TP3Ver2 {
             return -1;
         }
 
+        /**
+         * https://java2blog.com/depth-first-search-in-java/
+         * 
+         * @param karyawan
+         * @return
+         */
+        ArrayList<Karyawan> dfsUsingStack(Karyawan karyawan) {
+            // Arraylist sementara untuk menampung peringkat-peringkat dari suatu network
+            // (sorted)
+            tempNetwork = new ArrayList<Karyawan>(V);
+
+            Stack<Karyawan> stack = new Stack<Karyawan>();
+            stack.add(karyawan);
+            while (!stack.isEmpty()) {
+                Karyawan element = stack.pop();
+                int indexElement = element.getIdentitas() - 1;
+
+                if (!element.getIsVisited()) {
+                    // Set visited as true
+                    element.toggleIsVisited();
+
+                    // Masukkan ke dalam arraylist network.
+                    addSortedWithBinSer(tempNetwork, element);
+                }
+
+                List<Karyawan> neighbours = adj[indexElement];
+                for (int i = 0; i < neighbours.size(); i++) {
+                    Karyawan n = neighbours.get(i);
+                    if (n != null && !n.getIsVisited()) {
+                        stack.add(n);
+                    }
+                }
+            }
+            return tempNetwork;
+        }
+
         void printAdjList(int karyawanKe) {
             for (int i = 0; i < adj[karyawanKe - 1].size(); i++) {
                 out.println(adj[karyawanKe - 1].get(i).getPangkat());
@@ -197,11 +292,20 @@ public class TP3Ver2 {
     static class Karyawan {
         private int identitas;
         private int pangkat;
+
+        /**
+         * Flags
+         */
         private boolean isRentan;
+        private boolean isVisited;
+        private boolean isResigned;
 
         public Karyawan(int identitas, int pangkat) {
             this.identitas = identitas;
             this.pangkat = pangkat;
+            this.isRentan = false;
+            this.isVisited = false;
+            this.isResigned = false;
         }
 
         public int getIdentitas() {
@@ -210,6 +314,22 @@ public class TP3Ver2 {
 
         public int getPangkat() {
             return this.pangkat;
+        }
+
+        public boolean getIsVisited() {
+            return this.isVisited;
+        }
+
+        public boolean getIsResigned() {
+            return this.isResigned;
+        }
+
+        public void toggleIsResigned() {
+            this.isResigned = true;
+        }
+
+        public void toggleIsVisited() {
+            this.isVisited = true;
         }
 
         public void setPangkat(int newPangkat) {
