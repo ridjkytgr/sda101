@@ -265,7 +265,7 @@ public class TP3Ver2 {
                 return new ArrayList<Karyawan>(Arrays.asList(new Karyawan(0, 0)));
             }
 
-            tempNetwork = new ArrayList<Karyawan>(V);
+            tempNetwork = new ArrayList<Karyawan>();
 
             Stack<Karyawan> stack = new Stack<Karyawan>();
             if (!karyawan.getIsVisited()) {
