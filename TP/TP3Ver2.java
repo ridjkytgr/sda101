@@ -15,8 +15,18 @@ public class TP3Ver2 {
     public static int[] peringkatMax = new int[1]; // Untuk menyimpan peringkat max dari network karyawan ke-i.
 
     public static void bossHandler(Graph graf, Karyawan karyawanKe, int[] peringkatMax, int counterArray) {
-        ArrayList<Karyawan> tempNetwork;
+        // Lakukan pengecekan network lain (Ganti pake while loop biar starting
+        // point-nya ga dari awal)
+        while (counterArray < peringkatMax.length) {
+            if (peringkatMax[counterArray] == -1) {
+                peringkatMaxFill(graf, dataKaryawan[counterArray], peringkatMax);
+            }
+            counterArray++;
+        }
+    }
 
+    public static void peringkatMaxFill(Graph graf, Karyawan karyawanKe, int[] peringkatMax) {
+        ArrayList<Karyawan> tempNetwork;
         // Lakukan pengecekan suatu network dan dapatkan ArrayList yang berisi peringkat
         // terurut.
         tempNetwork = graf.dfsUsingStack(karyawanKe);
@@ -43,17 +53,6 @@ public class TP3Ver2 {
                 }
             }
         }
-
-        // Lakukan pengecekan network lain (Ganti pake while loop biar starting
-        // point-nya ga dari awal)
-        while (counterArray < peringkatMax.length) {
-            if (peringkatMax[counterArray] == -1) {
-                bossHandler(graf, dataKaryawan[counterArray], peringkatMax, counterArray++);
-                break;
-            }
-            counterArray++;
-        }
-        return;
     }
 
     public static void main(String[] args) {
