@@ -1,3 +1,8 @@
+
+/**
+ * Referensi: Rakha Rayhan Nusyura, Zuhal 'Alimul Hadi
+ */
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,8 +15,9 @@ public class TP3Ver2 {
     private static InputReader in;
     public static PrintWriter out;
     public static Karyawan[] dataKaryawan = new Karyawan[0];
-    public static int banyakRentan = 0;
+    public static int banyakPede = 0;
     public static boolean bossStatus = false;
+    public static boolean simulasiStatus = false;
     public static int[] peringkatMax = new int[0]; // Untuk menyimpan peringkat max dari network karyawan ke-i.
 
     /**
@@ -68,6 +74,15 @@ public class TP3Ver2 {
                 } else {
                     peringkatMax[indexKaryawan] = fakeMax; // Ini jika dirinya sendiri adalah pangkat tertinggi.
                 }
+            }
+        }
+    }
+
+    public static void simulasiHandler() {
+        for (int i = 0; i < dataKaryawan.length; i++) {
+            if (dataKaryawan[i].getTemanJago() == 0) {
+                banyakPede++;
+                dataKaryawan[i].setIsPede(true);
             }
         }
     }
@@ -143,6 +158,15 @@ public class TP3Ver2 {
 
             } else if (kode == 6) { // Simulasi
 
+                if (simulasiStatus == false) {
+
+                    simulasiHandler();
+                    simulasiStatus = true;
+                    out.println(banyakPede);
+                } else {
+                    out.println(banyakPede);
+                }
+
             } else if (kode == 7) { // Networking
                 out.println(0);
             }
@@ -175,6 +199,27 @@ public class TP3Ver2 {
 
             addSortedWithBinSer(adj[identitasV - 1], w);
             addSortedWithBinSer(adj[identitasW - 1], v);
+
+            // Menambah teman-teman dengan pangkat yang lebih besar
+            Karyawan karyawanV = dataKaryawan[identitasV - 1];
+            Karyawan karyawanW = dataKaryawan[identitasW - 1];
+            if (karyawanV.getPangkat() <= karyawanW.getPangkat()) {
+                karyawanV.incrementTemanJago();
+            } else if (karyawanW.getPangkat() <= karyawanV.getPangkat()) {
+                karyawanW.incrementTemanJago();
+            }
+
+            if (simulasiStatus) {
+                if (karyawanV.getIsPede() && karyawanV.getTemanJago() != 0) {
+                    banyakPede--;
+                    karyawanV.setIsPede(false);
+                }
+
+                if (karyawanW.getIsPede() && karyawanW.getTemanJago() != 0) {
+                    banyakPede--;
+                    karyawanW.setIsPede(false);
+                }
+            }
         }
 
         /**
@@ -253,15 +298,34 @@ public class TP3Ver2 {
          */
         void resign(Karyawan karyawanKe) {
             int indexKaryawanDihapus = karyawanKe.getIdentitas() - 1;
+            Karyawan karyawanDihapus = dataKaryawan[indexKaryawanDihapus];
             List<Karyawan> adjRemoved = adj[indexKaryawanDihapus];
 
             for (int i = 0; i < adjRemoved.size(); i++) { // Menghapus kemunculan node yang di-resign pada adjlist
                                                           // tetangganya.
+                Karyawan tetangga = adjRemoved.get(i);
+                // Handle untuk simulasi
+                if (karyawanDihapus.getPangkat() >= tetangga.getPangkat()) {
+                    tetangga.decrementTemanjago();
+
+                    // Jika akhirnya tidak ada teman yang jago
+                    if (simulasiStatus) {
+                        if (tetangga.getTemanJago() == 0 && !tetangga.getIsPede()) {
+                            tetangga.setIsPede(true);
+                            banyakPede++;
+                        }
+                    }
+                }
+
                 List<Karyawan> adjTetangga = adj[adjRemoved.get(i).getIdentitas() - 1];
                 int indexFound = binarySearch(adjTetangga, karyawanKe);
                 adjTetangga.remove(indexFound);
             }
 
+            // Menghapus karyawan yang pede
+            if (karyawanDihapus.getIsPede()) {
+                banyakPede--;
+            }
         }
 
         int binarySearch(List<Karyawan> arr, Karyawan x) {
@@ -344,20 +408,22 @@ public class TP3Ver2 {
     static class Karyawan {
         private int identitas;
         private int pangkat;
+        private int temanJago;
 
         /**
          * Flags
          */
-        private boolean isRentan;
+        private boolean isPede;
         private boolean isVisited;
         private boolean isResigned;
 
         public Karyawan(int identitas, int pangkat) {
             this.identitas = identitas;
             this.pangkat = pangkat;
-            this.isRentan = false;
+            this.isPede = false;
             this.isVisited = false;
             this.isResigned = false;
+            this.temanJago = 0;
         }
 
         public int getIdentitas() {
@@ -374,6 +440,26 @@ public class TP3Ver2 {
 
         public boolean getIsResigned() {
             return this.isResigned;
+        }
+
+        public boolean getIsPede() {
+            return this.isPede;
+        }
+
+        public int getTemanJago() {
+            return this.temanJago;
+        }
+
+        public void incrementTemanJago() {
+            this.temanJago++;
+        }
+
+        public void decrementTemanjago() {
+            this.temanJago--;
+        }
+
+        public void setIsPede(boolean newValue) {
+            this.isPede = newValue;
         }
 
         public void toggleIsResigned() {
