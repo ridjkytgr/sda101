@@ -14,6 +14,13 @@ public class TP3Ver2 {
     public static boolean bossStatus = false;
     public static int[] peringkatMax = new int[0]; // Untuk menyimpan peringkat max dari network karyawan ke-i.
 
+    /**
+     * Handler query BOSS.
+     * 
+     * @param graf         Graf yang digunakan
+     * @param karyawanKe   karyawan yang digunakan sebagai root untuk DFS
+     * @param peringkatMax Array untuk menyimpan BOSS dari masing-masing karyawan
+     */
     public static void bossHandler(Graph graf, Karyawan karyawanKe, int[] peringkatMax) {
         peringkatMaxFill(graf, karyawanKe, peringkatMax);
         // Lakukan pengecekan network lain (Ganti pake while loop biar starting
@@ -28,6 +35,13 @@ public class TP3Ver2 {
         }
     }
 
+    /**
+     * Method untuk mengisi array BOSS dari masing-masing karyawan.
+     * 
+     * @param graf         Graf yang digunakan
+     * @param karyawanKe   karyawan yang digunakan sebagai root untuk DFS
+     * @param peringkatMax Array untuk menyimpan BOSS dari masing-masing karyawan
+     */
     public static void peringkatMaxFill(Graph graf, Karyawan karyawanKe, int[] peringkatMax) {
 
         // Lakukan pengecekan suatu network dan dapatkan ArrayList yang berisi peringkat
@@ -150,10 +164,10 @@ public class TP3Ver2 {
         }
 
         /**
-         * Sorted adjacency list.
+         * Membuat sorted adjacency list.
          * 
-         * @param v
-         * @param w
+         * @param v Karyawan yang akan berteman dengan karyawan w.
+         * @param w Karyawan yang akan berteman dengan karyawan v.
          */
         void addEdge(Karyawan v, Karyawan w) {
             int identitasV = v.getIdentitas();
@@ -163,6 +177,13 @@ public class TP3Ver2 {
             addSortedWithBinSer(adj[identitasW - 1], v);
         }
 
+        /**
+         * Mengembalikan teman karyawan dengan pangkat tertinggi.
+         * 
+         * @param karyawanKe karyawan yang ingin dicari teman dengan pangkat
+         *                   tertingginya.
+         * @return objek karyawan yang memiliki pangkat tertinggi.
+         */
         int findMax(int karyawanKe) {
             if (adj[karyawanKe - 1].size() == 0) {
                 return 0;
@@ -171,6 +192,13 @@ public class TP3Ver2 {
             return adj[karyawanKe - 1].get(adj[karyawanKe - 1].size() - 1).getPangkat();
         }
 
+        /**
+         * Mengembalikan teman karyawan dengan pangkat terendah.
+         * 
+         * @param karyawanKe karyawan yang ingin dicari teman dengan pangkat
+         *                   tertingginya.
+         * @return objek karyawan yang memiliki pangkat tertinggi.
+         */
         int findMin(int karyawanKe) {
             if (adj[karyawanKe - 1].size() == 0) {
                 return 0;
@@ -178,6 +206,12 @@ public class TP3Ver2 {
             return adj[karyawanKe - 1].get(0).getPangkat();
         }
 
+        /**
+         * Memasukkan elemen ke dalam arraylist agar tetap menjaga urutannya.
+         * 
+         * @param adjList ArrayList yang ingin dimasukkan elemen.
+         * @param x       Elemen yang akan dimasukkan.
+         */
         void addSortedWithBinSer(List<Karyawan> adjList, Karyawan x) {
             int left = 0, right = adjList.size() - 1;
             int mid = 0;
@@ -212,6 +246,11 @@ public class TP3Ver2 {
             }
         }
 
+        /**
+         * Method untuk query RESIGN.
+         * 
+         * @param karyawanKe Karyawan yang ingin di-resign.
+         */
         void resign(Karyawan karyawanKe) {
             int indexKaryawanDihapus = karyawanKe.getIdentitas() - 1;
             List<Karyawan> adjRemoved = adj[indexKaryawanDihapus];
@@ -225,8 +264,6 @@ public class TP3Ver2 {
 
         }
 
-        // Returns index of x if it is present in arr[],
-        // else return -1
         int binarySearch(List<Karyawan> arr, Karyawan x) {
             int left = 0, right = arr.size() - 1;
 
@@ -253,9 +290,11 @@ public class TP3Ver2 {
 
         /**
          * https://java2blog.com/depth-first-search-in-java/
+         * Traversal dengan menggunakan DFS sekaligus menyimpan 1 network dalam bentuk
+         * sorted ArrayList.
          * 
-         * @param karyawan
-         * @return
+         * @param karyawan Root dari DFS.
+         * @return ArrayList yang berisi 1 network sorted ArrayList.
          */
         List<Karyawan> dfsUsingStack(Karyawan karyawan) {
             // Arraylist sementara untuk menampung peringkat-peringkat dari suatu network
