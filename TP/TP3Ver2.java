@@ -9,14 +9,17 @@ import java.util.*;
 public class TP3Ver2 {
     private static InputReader in;
     public static PrintWriter out;
-    public static Karyawan[] dataKaryawan = new Karyawan[100000];
+    public static Karyawan[] dataKaryawan = new Karyawan[0];
     public static int banyakRentan = 0;
     public static boolean bossStatus = false;
-    public static int[] peringkatMax = new int[1]; // Untuk menyimpan peringkat max dari network karyawan ke-i.
+    public static int[] peringkatMax = new int[0]; // Untuk menyimpan peringkat max dari network karyawan ke-i.
 
-    public static void bossHandler(Graph graf, Karyawan karyawanKe, int[] peringkatMax, int counterArray) {
+    public static void bossHandler(Graph graf, Karyawan karyawanKe, int[] peringkatMax) {
+        peringkatMaxFill(graf, karyawanKe, peringkatMax);
         // Lakukan pengecekan network lain (Ganti pake while loop biar starting
         // point-nya ga dari awal)
+
+        int counterArray = 0;
         while (counterArray < peringkatMax.length) {
             if (peringkatMax[counterArray] == -1) {
                 peringkatMaxFill(graf, dataKaryawan[counterArray], peringkatMax);
@@ -26,10 +29,10 @@ public class TP3Ver2 {
     }
 
     public static void peringkatMaxFill(Graph graf, Karyawan karyawanKe, int[] peringkatMax) {
-        ArrayList<Karyawan> tempNetwork;
+
         // Lakukan pengecekan suatu network dan dapatkan ArrayList yang berisi peringkat
         // terurut.
-        tempNetwork = graf.dfsUsingStack(karyawanKe);
+        List<Karyawan> tempNetwork = graf.dfsUsingStack(karyawanKe);
 
         // Jika tidak memiliki teman, maka keluar dari function dan set peringkatMax
         // menjadi 0.
@@ -75,12 +78,14 @@ public class TP3Ver2 {
         int q = in.nextInt();
 
         Graph graf = new Graph(n);
-
+        dataKaryawan = new Karyawan[n];
+        peringkatMax = new int[n];
         // Initialize pangkat-pangkat karyawan
         for (int i = 0; i < n; i++) {
             int pangkatKaryawan = in.nextInt();
 
             dataKaryawan[i] = new Karyawan(i + 1, pangkatKaryawan);
+            peringkatMax[i] = -1;
         }
 
         // Hubungan antarkaryawwan
@@ -112,13 +117,7 @@ public class TP3Ver2 {
                 int u = in.nextInt();
 
                 if (bossStatus == false) {
-                    // Untuk menyimpan peringkat dari semua BOSS.
-                    peringkatMax = new int[n];
-
-                    // Status: -1 belum dikunjungi, 0 ga punya temen, sisanya peringkat BOSS-nya.
-                    Arrays.fill(peringkatMax, -1);
-
-                    bossHandler(graf, dataKaryawan[u - 1], peringkatMax, 0);
+                    bossHandler(graf, dataKaryawan[u - 1], peringkatMax);
 
                     bossStatus = true;
 
@@ -139,8 +138,8 @@ public class TP3Ver2 {
 
     static class Graph {
         private int V; // No. of vertices
-        private ArrayList<Karyawan>[] adj; // Adjacency Lists
-        private ArrayList<Karyawan> tempNetwork;
+        private List<Karyawan>[] adj; // Adjacency Lists
+        private List<Karyawan> tempNetwork;
 
         // Constructor
         Graph(int v) {
@@ -150,7 +149,12 @@ public class TP3Ver2 {
                 adj[i] = new ArrayList();
         }
 
-        // Function to add an edge into the graph
+        /**
+         * Sorted adjacency list.
+         * 
+         * @param v
+         * @param w
+         */
         void addEdge(Karyawan v, Karyawan w) {
             int identitasV = v.getIdentitas();
             int identitasW = w.getIdentitas();
@@ -174,9 +178,9 @@ public class TP3Ver2 {
             return adj[karyawanKe - 1].get(0).getPangkat();
         }
 
-        void addSortedWithBinSer(ArrayList<Karyawan> adjList, Karyawan x) {
+        void addSortedWithBinSer(List<Karyawan> adjList, Karyawan x) {
             int left = 0, right = adjList.size() - 1;
-            int mid = (adjList.size() / 2) + 1;
+            int mid = 0;
 
             while (left <= right) {
                 mid = left + (right - left) / 2;
@@ -197,7 +201,9 @@ public class TP3Ver2 {
             }
 
             // Memasukkan element ke tempat yang cocok.
-            if (left >= mid) { // Memasukkan elemen di kanan mid.
+            if (left == adjList.size()) {
+                adjList.add(x);
+            } else if (left >= mid) { // Memasukkan elemen di kanan mid.
                 adjList.add(left, x);
             } else if (right == -1) { // Memasukkan elemen di paling kiri.
                 adjList.add(0, x);
@@ -208,11 +214,11 @@ public class TP3Ver2 {
 
         void resign(Karyawan karyawanKe) {
             int indexKaryawanDihapus = karyawanKe.getIdentitas() - 1;
-            ArrayList<Karyawan> adjRemoved = adj[indexKaryawanDihapus];
+            List<Karyawan> adjRemoved = adj[indexKaryawanDihapus];
 
             for (int i = 0; i < adjRemoved.size(); i++) { // Menghapus kemunculan node yang di-resign pada adjlist
                                                           // tetangganya.
-                ArrayList<Karyawan> adjTetangga = adj[adjRemoved.get(i).getIdentitas() - 1];
+                List<Karyawan> adjTetangga = adj[adjRemoved.get(i).getIdentitas() - 1];
                 int indexFound = binarySearch(adjTetangga, karyawanKe);
                 adjTetangga.remove(indexFound);
             }
@@ -221,7 +227,7 @@ public class TP3Ver2 {
 
         // Returns index of x if it is present in arr[],
         // else return -1
-        int binarySearch(ArrayList<Karyawan> arr, Karyawan x) {
+        int binarySearch(List<Karyawan> arr, Karyawan x) {
             int left = 0, right = arr.size() - 1;
 
             while (left <= right) {
@@ -251,13 +257,21 @@ public class TP3Ver2 {
          * @param karyawan
          * @return
          */
-        ArrayList<Karyawan> dfsUsingStack(Karyawan karyawan) {
+        List<Karyawan> dfsUsingStack(Karyawan karyawan) {
             // Arraylist sementara untuk menampung peringkat-peringkat dari suatu network
             // (sorted)
+            if (adj[karyawan.getIdentitas() - 1].size() == 0) { // Mengembalikan arraylist karyawan yang berisi pangkat
+                                                                // 0 untuk dipanggil di atas.
+                return new ArrayList<Karyawan>(Arrays.asList(new Karyawan(0, 0)));
+            }
+
             tempNetwork = new ArrayList<Karyawan>(V);
 
             Stack<Karyawan> stack = new Stack<Karyawan>();
-            stack.add(karyawan);
+            if (!karyawan.getIsVisited()) {
+                stack.add(karyawan);
+            }
+
             while (!stack.isEmpty()) {
                 Karyawan element = stack.pop();
                 int indexElement = element.getIdentitas() - 1;
