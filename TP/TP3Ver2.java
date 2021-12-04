@@ -21,6 +21,7 @@ public class TP3Ver2 {
     public static int[] peringkatMax = new int[0]; // Untuk menyimpan peringkat max dari network karyawan ke-i.
     public static int[] dist = new int[0];
     public static boolean[] flagBFS = new boolean[0];
+    public static boolean[] flagPangkatSama = new boolean[0];
 
     // Index 0 = karyawan pangkat 1.
     public static ArrayList<ArrayList<Karyawan>> pangkatSama = new ArrayList<ArrayList<Karyawan>>(0);
@@ -136,6 +137,8 @@ public class TP3Ver2 {
             // Mengisi arraylist yang berpangkat sama.
             pangkatSama.get(pangkatKaryawan - 1).add(karyawanBaru);
         }
+
+        flagPangkatSama = new boolean[pangkatSama.size()];
 
         // Hubungan antarkaryawwan
         for (int i = 0; i < m; i++) {
@@ -297,7 +300,7 @@ public class TP3Ver2 {
                 // Check if x is present at mid
                 if (adjList.get(mid).getPangkat() == x.getPangkat()) {
                     adjList.add(mid, x);
-                    break;
+                    return;
                 }
 
                 // If x greater, ignore left half
@@ -362,13 +365,16 @@ public class TP3Ver2 {
         int binarySearch(List<Karyawan> arr, Karyawan x) {
             int left = 0, right = arr.size() - 1;
             int mid = 0;
+            int temp = 0;
 
             while (left <= right) {
                 mid = left + (right - left) / 2;
 
                 // Check if x is present at mid
-                if (arr.get(mid).getPangkat() == x.getPangkat())
+                if (arr.get(mid).getPangkat() == x.getPangkat()) {
+                    temp = mid;
                     break;
+                }
 
                 // If x greater, ignore left half
                 if (arr.get(mid).getPangkat() < x.getPangkat())
@@ -381,17 +387,19 @@ public class TP3Ver2 {
 
             if (arr.get(mid).getIdentitas() == x.getIdentitas()) { // Jika identitasnya sudah benar
                 return mid;
-            } else {
+            }
+
+            if (arr.get(mid).getIdentitas() != x.getIdentitas()) { // Cek ke kiri
                 while (mid > 0 && arr.get(mid).getPangkat() == x.getPangkat()
-                        && arr.get(mid).getIdentitas() != x.getIdentitas()) { // Cek
-                    // ke
-                    // kiri
+                        && arr.get(mid).getIdentitas() != x.getIdentitas()) {
                     mid--;
                 }
+            }
+
+            if (arr.get(mid).getIdentitas() != x.getIdentitas()) { // Cek ke kanan
+                mid = temp; // Reset kembali ke tengah
                 while (mid < arr.size() && arr.get(mid).getPangkat() == x.getPangkat()
-                        && arr.get(mid).getIdentitas() != x.getIdentitas()) { // Cek
-                    // ke
-                    // kanan
+                        && arr.get(mid).getIdentitas() != x.getIdentitas()) {
                     mid++;
                 }
             }
@@ -403,18 +411,16 @@ public class TP3Ver2 {
 
         /**
          * BFS yang telah disesuaikan untuk menghitung jarak terpendek antar 2 karyawan.
+         * Reference: https://www.geeksforgeeks.org/shortest-path-unweighted-graph/
          * 
-         * @param adj
          * @param src
          * @param dest
-         * @param v
-         * @param pred
-         * @param dist
          * @return
          */
         void BFSForShortestDistance(Karyawan src, Karyawan dest) {
             Arrays.fill(dist, -1);
             Arrays.fill(flagBFS, false);
+            Arrays.fill(flagPangkatSama, false);
 
             int indexSrc = src.getIdentitas() - 1;
             int indexDest = dest.getIdentitas() - 1;
@@ -438,6 +444,24 @@ public class TP3Ver2 {
             while (!queue.isEmpty()) {
                 Karyawan u = queue.remove();
                 int indexU = u.getIdentitas() - 1;
+
+                if (!flagPangkatSama[u.getPangkat() - 1]) {
+                    for (int i = 0; i < pangkatSama.get(u.getPangkat() - 1).size(); i++) { // Loop pangkat sama
+                        if (!flagBFS[pangkatSama.get(u.getPangkat() - 1).get(i).getIdentitas() - 1]
+                                && !pangkatSama.get(u.getPangkat() - 1).get(i).getIsResigned()) {
+                            flagBFS[pangkatSama.get(u.getPangkat() - 1).get(i).getIdentitas() - 1] = true;
+                            flagPangkatSama[u.getPangkat() - 1] = true;
+                            dist[pangkatSama.get(u.getPangkat() - 1).get(i).getIdentitas() - 1] = dist[indexU] + 1;
+                            queue.add(pangkatSama.get(u.getPangkat() - 1).get(i));
+
+                            // stopping condition (when we find
+                            // our destination)
+                            if (pangkatSama.get(u.getPangkat() - 1).get(i).equals(dest))
+                                return;
+                        }
+                    }
+                }
+
                 for (int i = 0; i < adj[indexU].size(); i++) { // Loop adjacency list
                     if (!flagBFS[adj[indexU].get(i).getIdentitas() - 1] && !adj[indexU].get(i).getIsResigned()) {
                         flagBFS[adj[indexU].get(i).getIdentitas() - 1] = true;
@@ -447,20 +471,6 @@ public class TP3Ver2 {
                         // stopping condition (when we find
                         // our destination)
                         if (adj[indexU].get(i).equals(dest))
-                            return;
-                    }
-                }
-
-                for (int i = 0; i < pangkatSama.get(u.getPangkat() - 1).size(); i++) { // Loop pangkat sama
-                    if (!flagBFS[pangkatSama.get(u.getPangkat() - 1).get(i).getIdentitas() - 1]
-                            && !pangkatSama.get(u.getPangkat() - 1).get(i).getIsResigned()) {
-                        flagBFS[pangkatSama.get(u.getPangkat() - 1).get(i).getIdentitas() - 1] = true;
-                        dist[pangkatSama.get(u.getPangkat() - 1).get(i).getIdentitas() - 1] = dist[indexU] + 1;
-                        queue.add(pangkatSama.get(u.getPangkat() - 1).get(i));
-
-                        // stopping condition (when we find
-                        // our destination)
-                        if (pangkatSama.get(u.getPangkat() - 1).get(i).equals(dest))
                             return;
                     }
                 }
