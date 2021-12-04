@@ -80,7 +80,7 @@ public class TP3Ver2 {
 
     public static void simulasiHandler() {
         for (int i = 0; i < dataKaryawan.length; i++) {
-            if (dataKaryawan[i].getTemanJago() == 0) {
+            if (dataKaryawan[i].getTemanJago() == 0 && !dataKaryawan[i].getIsResigned()) {
                 banyakPede++;
                 dataKaryawan[i].setIsPede(true);
             }
@@ -299,6 +299,7 @@ public class TP3Ver2 {
         void resign(Karyawan karyawanKe) {
             int indexKaryawanDihapus = karyawanKe.getIdentitas() - 1;
             Karyawan karyawanDihapus = dataKaryawan[indexKaryawanDihapus];
+            karyawanDihapus.toggleIsResigned();
             List<Karyawan> adjRemoved = adj[indexKaryawanDihapus];
 
             for (int i = 0; i < adjRemoved.size(); i++) { // Menghapus kemunculan node yang di-resign pada adjlist
