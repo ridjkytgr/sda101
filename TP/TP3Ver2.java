@@ -1,6 +1,6 @@
 
 /**
- * Referensi: Rakha Rayhan Nusyura, Zuhal 'Alimul Hadi
+ * Referensi: Rakha Rayhan Nusyura, Zuhal 'Alimul Hadi, Sabyna Maharani
  */
 
 import java.io.BufferedReader;
@@ -19,6 +19,8 @@ public class TP3Ver2 {
     public static boolean bossStatus = false;
     public static boolean simulasiStatus = false;
     public static int[] peringkatMax = new int[0]; // Untuk menyimpan peringkat max dari network karyawan ke-i.
+    public static int[] dist = new int[0];
+    public static boolean[] flagBFS = new boolean[0];
 
     /**
      * Handler query BOSS.
@@ -109,12 +111,17 @@ public class TP3Ver2 {
         Graph graf = new Graph(n);
         dataKaryawan = new Karyawan[n];
         peringkatMax = new int[n];
+        dist = new int[n];
+        flagBFS = new boolean[n];
+
         // Initialize pangkat-pangkat karyawan
         for (int i = 0; i < n; i++) {
             int pangkatKaryawan = in.nextInt();
 
             dataKaryawan[i] = new Karyawan(i + 1, pangkatKaryawan);
             peringkatMax[i] = -1;
+            dist[i] = -1;
+            flagBFS[i] = false;
         }
 
         // Hubungan antarkaryawwan
@@ -155,7 +162,17 @@ public class TP3Ver2 {
                     out.println(peringkatMax[u - 1]);
                 }
             } else if (kode == 5) { // Sebar
+                int u = in.nextInt();
 
+                int v = in.nextInt();
+
+                graf.BFSForShortestDistance(dataKaryawan[u - 1], dataKaryawan[v - 1]);
+
+                if (dist[v - 1] != 0 && dist[v - 1] != -1) {
+                    out.println(dist[v - 1] - 1); // Exclude node src dan dest.
+                } else {
+                    out.println(dist[v - 1]); // Jika src == dest atau tidak mungkin mengirimkan pesan.
+                }
             } else if (kode == 6) { // Simulasi
 
                 if (simulasiStatus == false) {
@@ -354,6 +371,59 @@ public class TP3Ver2 {
         }
 
         /**
+         * BFS yang telah disesuaikan untuk menghitung jarak terpendek antar 2 karyawan.
+         * 
+         * @param adj
+         * @param src
+         * @param dest
+         * @param v
+         * @param pred
+         * @param dist
+         * @return
+         */
+        void BFSForShortestDistance(Karyawan src, Karyawan dest) {
+            Arrays.fill(dist, -1);
+            Arrays.fill(flagBFS, false);
+
+            int indexSrc = src.getIdentitas() - 1;
+            int indexDest = dest.getIdentitas() - 1;
+
+            // Jika sebar ke diri sendiri
+            if (src.equals(dest)) {
+                dist[indexSrc] = 0;
+                dist[indexDest] = 0;
+                return;
+            }
+
+            LinkedList<Karyawan> queue = new LinkedList<Karyawan>();
+
+            // now source is first to be visited and
+            // distance from source to itself should be 0
+            flagBFS[indexSrc] = true;
+            dist[indexSrc] = 0;
+            queue.add(src);
+
+            // bfs Algorithm
+            while (!queue.isEmpty()) {
+                Karyawan u = queue.remove();
+                int indexU = u.getIdentitas() - 1;
+                for (int i = 0; i < adj[indexU].size(); i++) {
+                    if (!flagBFS[adj[indexU].get(i).getIdentitas() - 1] && !adj[indexU].get(i).getIsResigned()) {
+                        flagBFS[adj[indexU].get(i).getIdentitas() - 1] = true;
+                        dist[adj[indexU].get(i).getIdentitas() - 1] = dist[indexU] + 1;
+                        queue.add(adj[indexU].get(i));
+
+                        // stopping condition (when we find
+                        // our destination)
+                        if (adj[indexU].get(i).equals(dest))
+                            return;
+                    }
+                }
+            }
+            return;
+        }
+
+        /**
          * https://java2blog.com/depth-first-search-in-java/
          * Traversal dengan menggunakan DFS sekaligus menyimpan 1 network dalam bentuk
          * sorted ArrayList.
@@ -372,7 +442,7 @@ public class TP3Ver2 {
             tempNetwork = new ArrayList<Karyawan>();
 
             Stack<Karyawan> stack = new Stack<Karyawan>();
-            if (!karyawan.getIsVisited()) {
+            if (!karyawan.getIsVisitedDFS()) {
                 stack.add(karyawan);
             }
 
@@ -380,9 +450,9 @@ public class TP3Ver2 {
                 Karyawan element = stack.pop();
                 int indexElement = element.getIdentitas() - 1;
 
-                if (!element.getIsVisited()) {
+                if (!element.getIsVisitedDFS()) {
                     // Set visited as true
-                    element.toggleIsVisited();
+                    element.toggleIsVisitedDFS();
 
                     // Masukkan ke dalam arraylist network.
                     addSortedWithBinSer(tempNetwork, element);
@@ -391,7 +461,7 @@ public class TP3Ver2 {
                 List<Karyawan> neighbours = adj[indexElement];
                 for (int i = 0; i < neighbours.size(); i++) {
                     Karyawan n = neighbours.get(i);
-                    if (n != null && !n.getIsVisited()) {
+                    if (n != null && !n.getIsVisitedDFS()) {
                         stack.add(n);
                     }
                 }
@@ -415,14 +485,16 @@ public class TP3Ver2 {
          * Flags
          */
         private boolean isPede;
-        private boolean isVisited;
+        private boolean isVisitedDFS;
+        private boolean isVisitedBFS;
         private boolean isResigned;
 
         public Karyawan(int identitas, int pangkat) {
             this.identitas = identitas;
             this.pangkat = pangkat;
             this.isPede = false;
-            this.isVisited = false;
+            this.isVisitedDFS = false;
+            this.isVisitedBFS = false;
             this.isResigned = false;
             this.temanJago = 0;
         }
@@ -435,8 +507,12 @@ public class TP3Ver2 {
             return this.pangkat;
         }
 
-        public boolean getIsVisited() {
-            return this.isVisited;
+        public boolean getIsVisitedDFS() {
+            return this.isVisitedDFS;
+        }
+
+        public boolean getIsVisitedBFS() {
+            return this.isVisitedBFS;
         }
 
         public boolean getIsResigned() {
@@ -467,8 +543,12 @@ public class TP3Ver2 {
             this.isResigned = true;
         }
 
-        public void toggleIsVisited() {
-            this.isVisited = true;
+        public void toggleIsVisitedDFS() {
+            this.isVisitedDFS = true;
+        }
+
+        public void setIsVisitedBFS(boolean newValue) {
+            this.isVisitedBFS = newValue;
         }
 
         public void setPangkat(int newPangkat) {
